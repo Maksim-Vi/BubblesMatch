@@ -1,0 +1,37 @@
+{
+  "basePath": "assets/",
+  "assets": [
+    {
+      "load": "bg/bg",
+      "assetName": "bg",
+      "assetPath": "bg/",
+      "fullAssetPath": "/Users/max_home/Projects/PixiProjects/BubbleMatch/public/assets/bg/",
+      "ext": "png",
+      "type": "image"
+    },
+    {
+      "load": "ico/1",
+      "assetName": "1",
+      "assetPath": "ico/",
+      "fullAssetPath": "/Users/max_home/Projects/PixiProjects/BubbleMatch/public/assets/ico/",
+      "ext": "png",
+      "type": "image"
+    },
+    {
+      "load": "ico/2",
+      "assetName": "2",
+      "assetPath": "ico/",
+      "fullAssetPath": "/Users/max_home/Projects/PixiProjects/BubbleMatch/public/assets/ico/",
+      "ext": "png",
+      "type": "image"
+    },
+    {
+      "load": "ico/3",
+      "assetName": "3",
+      "assetPath": "ico/",
+      "fullAssetPath": "/Users/max_home/Projects/PixiProjects/BubbleMatch/public/assets/ico/",
+      "ext": "png",
+      "type": "image"
+    }
+  ]
+}

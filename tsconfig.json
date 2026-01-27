@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "esnext",
+    "target": "es6",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "./",
+    "paths": {
+      "src/*": ["src/*"],
+      "public/*": ["public/*"]
+    }
+  },
+  "include": ["src/**/*", "src/global.d.ts"]
+}
