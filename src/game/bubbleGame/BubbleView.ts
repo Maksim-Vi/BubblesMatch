@@ -1,7 +1,7 @@
 import { Container, Graphics } from "pixi.js";
 import { View } from "src/core/mvc/View";
 import { ScreenHelper } from "src/core/ScreenHelper";
-import { Grid } from "src/common/Grid/Grid";
+import { Grid } from "src/common/grid/Grid";
 import { BubbleModel } from "./BubbleModel";
 
 export class BubbleView extends View<BubbleModel> {

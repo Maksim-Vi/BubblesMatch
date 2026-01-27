@@ -11,6 +11,8 @@ export interface IGridConfig{
 export interface ILevelConfig {
     id: number;
     gridConfig: IGridConfig;
+    maxItems: number;
+    maxMoves: number;
     colors: TileColor[];
 }
 
@@ -38,6 +40,8 @@ export class LevelStore extends Model {
                     cellSize: 82,
                     gap: 3
                 },
+                maxItems: 500,
+                maxMoves: 50,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE],
             },
         ];

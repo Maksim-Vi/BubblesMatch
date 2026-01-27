@@ -101,6 +101,10 @@ export class SwipeSystem<T extends Container = Container, TExtra = {}> {
         return this.state?.active ?? false;
     }
 
+    public cancel(): void {
+        this.resetState();
+    }
+
     public destroy(): void {
         this.inputSystem.destroy();
         this.resetState();

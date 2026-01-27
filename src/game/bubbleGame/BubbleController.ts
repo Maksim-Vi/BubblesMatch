@@ -10,6 +10,8 @@ import AssetsLoader from "src/assetsLoader/AssetsLoader";
 import { SwipeSystem, SwipeVector, ClickSystem } from "src/common/input";
 import { MatchFinder } from "./match/MatchFinder";
 import { ScoreCalculator } from "./match/ScoreCalculator";
+import { GravitySystem, GravityMove } from "src/game/bubbleGame/gravity";
+import gsap from "gsap";
 
 interface TileSwipeExtra {
     tile: BubbleTile;
@@ -20,17 +22,20 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     private availableColors = [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE];
     private swipeSystem: SwipeSystem<BubbleTile, TileSwipeExtra>;
     private clickSystem: ClickSystem<BubbleTile>;
+    private gravitySystem: GravitySystem<BubbleTile>;
     private readonly MIN_MATCH_COUNT = 2;
+    private isAnimating: boolean = false;
 
     init(): void {
         this.setupSwipeSystem();
         this.setupClickSystem();
         this.fillGrid();
+        this.gravitySystem = new GravitySystem(this.model.getGrid());
     }
 
     private setupSwipeSystem(): void {
         this.swipeSystem = new SwipeSystem<BubbleTile, TileSwipeExtra>({
-            canSwipe: (tile) => tile.hasItem(),
+            canSwipe: (tile) => !this.isAnimating && tile.hasItem(),
             getExtra: (tile) => ({ tile }),
             onSwipe: (tile, _direction, vector) => {
                 this.trySwapInDirection(tile, vector);
@@ -40,7 +45,7 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
 
     private setupClickSystem(): void {
         this.clickSystem = new ClickSystem<BubbleTile>({
-            canClick: (tile) => tile.hasItem(),
+            canClick: (tile) => !this.isAnimating && tile.hasItem(),
             onDoubleClick: (tile) => {
                 this.tryCollectMatch(tile);
             }
@@ -61,12 +66,128 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
 
         console.log(`Collected ${matchResult!.count} ${TileColor[matchResult!.color]} items! Score: +${scoreResult.totalScore} (Total: ${this.model.score})`);
 
+        // Cancel any active swipe to prevent accidental moves after collection
+        this.swipeSystem.cancel();
+
+        // Remove collected items
         for (const matchedTile of matchResult!.tiles) {
             const item = matchedTile.removeItem();
             if (item) {
                 item.destroy();
             }
         }
+
+        // Apply gravity and fill empty cells
+        this.applyGravityAndRefill();
+    }
+
+    private async applyGravityAndRefill(): Promise<void> {
+        this.isAnimating = true;
+
+        // Apply gravity (items fall down) with animation
+        const gravityMoves = this.gravitySystem.applyGravity();
+        await this.animateMoves(gravityMoves, 0.15, 0.03);
+
+        // Shift right with animation
+        const shiftMoves = this.gravitySystem.shiftRight();
+        await this.animateMoves(shiftMoves, 0.12, 0.02);
+
+        console.log(`Gravity: ${gravityMoves.length} falls, ${shiftMoves.length} shifts`);
+
+        // Fill empty cells with new items
+        await this.fillEmptyCellsAnimated();
+
+        this.isAnimating = false;
+    }
+
+    private animateMoves(moves: GravityMove[], duration: number, stagger: number): Promise<void> {
+        return new Promise((resolve) => {
+            if (moves.length === 0) {
+                resolve();
+                return;
+            }
+
+            const grid = this.model.getGrid();
+            const tl = gsap.timeline({ onComplete: resolve });
+
+            moves.forEach((move, index) => {
+                const targetTile = grid.getTile(move.toRow, move.toCol);
+                const item = targetTile?.getItem();
+
+                if (item) {
+                    // Calculate offset from source position
+                    const sourceTile = grid.getTile(move.fromRow, move.fromCol);
+                    if (sourceTile && targetTile) {
+                        const offsetX = sourceTile.x - targetTile.x;
+                        const offsetY = sourceTile.y - targetTile.y;
+
+                        // Set item to source position (relative to its parent tile)
+                        item.x += offsetX;
+                        item.y += offsetY;
+
+                        // Animate back to center of tile
+                        tl.to(item, {
+                            x: targetTile.data.sizeTile / 2,
+                            y: targetTile.data.sizeTile / 2,
+                            duration,
+                            ease: "power2.out"
+                        }, index * stagger);
+                    }
+                }
+            });
+
+            if (moves.length === 0) {
+                resolve();
+            }
+        });
+    }
+
+    private async fillEmptyCellsAnimated(): Promise<void> {
+        const emptyCells = this.gravitySystem.getEmptyCells();
+        const grid = this.model.getGrid();
+        let spawnedCount = 0;
+
+        const itemsToAnimate: { item: Item; targetScale: number }[] = [];
+
+        for (const { row, col } of emptyCells) {
+            if (!this.model.canSpawnMore()) {
+                console.log(`Max items reached: ${this.model.spawnedItems}/${this.model.maxItems}`);
+                break;
+            }
+
+            const tile = grid.getTile(row, col);
+            if (tile && !tile.hasItem()) {
+                const randomColor = this.getRandomColor(this.availableColors);
+                const item = this.createItem(randomColor);
+
+                tile.setItem(item);
+
+                // Save target scale and set to 0 for pop-in animation
+                const targetScale = item.scale.x;
+                item.scale.set(0);
+
+                this.model.incrementSpawnedItems();
+                itemsToAnimate.push({ item, targetScale });
+                spawnedCount++;
+            }
+        }
+
+        // Animate all new items with stagger
+        if (itemsToAnimate.length > 0) {
+            await new Promise<void>((resolve) => {
+                const tl = gsap.timeline({ onComplete: resolve });
+                itemsToAnimate.forEach(({ item, targetScale }, index) => {
+                    tl.to(item.scale, {
+                        x: targetScale,
+                        y: targetScale,
+                        duration: 0.2,
+                        ease: "back.out(1.5)"
+                    }, index * 0.02);
+                });
+            });
+        }
+
+        console.log(`Filled ${spawnedCount} empty cells (Total spawned: ${this.model.spawnedItems}/${this.model.maxItems})`);
     }
 
     private fillGrid() {
@@ -109,6 +230,7 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
 
         const item = this.createItem(randomColor);
         tile.setItem(item);
+        this.model.incrementSpawnedItems();
 
         this.swipeSystem.attach(tile);
         this.clickSystem.attach(tile);

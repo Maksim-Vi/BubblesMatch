@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Grid } from 'src/common/Grid/Grid';
+import { Grid } from 'src/common/grid/Grid';
 import { BubbleTile } from '../tileBubble/BubbleTile';
 import { TileColor } from 'src/common/cell/Tile';
 
