@@ -7,7 +7,9 @@ import { ScreenHelper } from "src/core/ScreenHelper";
 import { ITileData, TileColor } from "src/common/cell/Tile";
 import { Item } from "./Item/Item";
 import AssetsLoader from "src/assetsLoader/AssetsLoader";
-import { SwipeSystem, SwipeVector } from "src/common/input";
+import { SwipeSystem, SwipeVector, ClickSystem } from "src/common/input";
+import { MatchFinder } from "./match/MatchFinder";
+import { ScoreCalculator } from "./match/ScoreCalculator";
 
 interface TileSwipeExtra {
     tile: BubbleTile;
@@ -17,9 +19,12 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
 
     private availableColors = [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE];
     private swipeSystem: SwipeSystem<BubbleTile, TileSwipeExtra>;
+    private clickSystem: ClickSystem<BubbleTile>;
+    private readonly MIN_MATCH_COUNT = 2;
 
     init(): void {
         this.setupSwipeSystem();
+        this.setupClickSystem();
         this.fillGrid();
     }
 
@@ -31,6 +36,37 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
                 this.trySwapInDirection(tile, vector);
             }
         }, { threshold: 30 });
+    }
+
+    private setupClickSystem(): void {
+        this.clickSystem = new ClickSystem<BubbleTile>({
+            canClick: (tile) => tile.hasItem(),
+            onDoubleClick: (tile) => {
+                this.tryCollectMatch(tile);
+            }
+        }, { doubleClickDelay: 300 });
+    }
+
+    private tryCollectMatch(tile: BubbleTile): void {
+        const grid = this.model.getGrid();
+        const matchResult = MatchFinder.findConnectedTiles(grid, tile);
+
+        if (!MatchFinder.isValidMatch(matchResult, this.MIN_MATCH_COUNT)) {
+            console.log(`Match too small: ${matchResult?.count || 0} (min: ${this.MIN_MATCH_COUNT})`);
+            return;
+        }
+
+        const scoreResult = ScoreCalculator.calculate(matchResult!.count, this.model.multiplier);
+        this.model.addScore(scoreResult.totalScore);
+
+        console.log(`Collected ${matchResult!.count} ${TileColor[matchResult!.color]} items! Score: +${scoreResult.totalScore} (Total: ${this.model.score})`);
+
+        for (const matchedTile of matchResult!.tiles) {
+            const item = matchedTile.removeItem();
+            if (item) {
+                item.destroy();
+            }
+        }
     }
 
     private fillGrid() {
@@ -75,11 +111,14 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
         tile.setItem(item);
 
         this.swipeSystem.attach(tile);
+        this.clickSystem.attach(tile);
 
         return tile;
     }
 
     private trySwapInDirection(fromTile: BubbleTile, direction: SwipeVector): void {
+        if (!fromTile.hasItem()) return;
+
         const grid = this.model.getGrid();
         const targetRow = fromTile.row + direction.row;
         const targetCol = fromTile.col + direction.col;
@@ -91,13 +130,13 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     }
 
     private swapItems(tileA: BubbleTile, tileB: BubbleTile): void {
-        const itemA = tileA.removeItem();
-        const itemB = tileB.removeItem();
+        if (!tileA.hasItem() || !tileB.hasItem()) return;
 
-        if (itemA && itemB) {
-            tileA.setItem(itemB);
-            tileB.setItem(itemA);
-        }
+        const itemA = tileA.removeItem()!;
+        const itemB = tileB.removeItem()!;
+
+        tileA.setItem(itemB);
+        tileB.setItem(itemA);
     }
 
     private createItem(color: TileColor): Item {
@@ -108,6 +147,7 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
 
     destroy(): void {
         this.swipeSystem.destroy();
+        this.clickSystem.destroy();
         GlobalDispatcher.removeAllForContext(this);
     }
 }
