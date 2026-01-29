@@ -8,6 +8,9 @@ export const MOVES_UPDATED: string = 'game:movesUpdated';
 
 // Screen events
 export const SHOW_FINISH_SCREEN: string = 'screen:showFinish';
+export const RESTART_GAME: string = 'game:restart';
+export const GO_TO_LOBBY: string = 'game:goToLobby';
+export const EXIT_GAME: string = 'game:exit';
 
 // Asset events
 export const ASSETS_LOAD_START: string = 'assets:loadStart';

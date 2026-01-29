@@ -37,23 +37,32 @@ export class GravitySystem<T extends IGravityCell> {
 
     /**
      * Apply gravity - items fall down to fill empty cells below
-     * Returns list of moves that were made
+     * Runs multiple passes until no more moves are made (stable state)
      */
     public applyGravity(): GravityMove[] {
-        const moves: GravityMove[] = [];
+        const allMoves: GravityMove[] = [];
+        let hasChanges = true;
 
-        // Process each column from bottom to top
-        for (let col = 0; col < this.grid.cols; col++) {
-            moves.push(...this.applyGravityToColumn(col));
+        while (hasChanges) {
+            hasChanges = false;
+
+            // Process columns from right to left
+            for (let col = this.grid.cols - 1; col >= 0; col--) {
+                const columnMoves = this.applyGravityToColumn(col);
+                if (columnMoves.length > 0) {
+                    hasChanges = true;
+                    allMoves.push(...columnMoves);
+                }
+            }
         }
 
-        return moves;
+        return allMoves;
     }
 
     private applyGravityToColumn(col: number): GravityMove[] {
         const moves: GravityMove[] = [];
 
-        // Start from second-to-last row and go up
+        // Start from second-to-last row and work up
         for (let row = this.grid.rows - 2; row >= 0; row--) {
             const tile = this.grid.getTile(row, col);
             if (!tile || !tile.hasItem()) continue;
@@ -91,55 +100,62 @@ export class GravitySystem<T extends IGravityCell> {
     }
 
     /**
-     * Shift columns right to fill empty columns
-     * Returns list of moves that were made
+     * Shift items right - each item moves to the rightmost empty cell in its row
+     * Runs multiple passes until no more moves are made (stable state)
      */
     public shiftRight(): GravityMove[] {
-        const moves: GravityMove[] = [];
+        const allMoves: GravityMove[] = [];
+        let hasChanges = true;
 
-        // Find empty columns and shift non-empty columns right
-        let writeCol = this.grid.cols - 1;
+        while (hasChanges) {
+            hasChanges = false;
 
-        for (let readCol = this.grid.cols - 1; readCol >= 0; readCol--) {
-            if (!this.isColumnEmpty(readCol)) {
-                if (writeCol !== readCol) {
-                    // Move entire column from readCol to writeCol
-                    moves.push(...this.moveColumn(readCol, writeCol));
+            // Process rows from bottom to top
+            for (let row = this.grid.rows - 1; row >= 0; row--) {
+                const rowMoves = this.shiftRowRight(row);
+                if (rowMoves.length > 0) {
+                    hasChanges = true;
+                    allMoves.push(...rowMoves);
                 }
-                writeCol--;
             }
         }
 
-        return moves;
+        return allMoves;
     }
 
-    private isColumnEmpty(col: number): boolean {
-        for (let row = 0; row < this.grid.rows; row++) {
-            const tile = this.grid.getTile(row, col);
-            if (tile && tile.hasItem()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private moveColumn(fromCol: number, toCol: number): GravityMove[] {
+    private shiftRowRight(row: number): GravityMove[] {
         const moves: GravityMove[] = [];
 
-        for (let row = 0; row < this.grid.rows; row++) {
-            const fromTile = this.grid.getTile(row, fromCol);
-            const toTile = this.grid.getTile(row, toCol);
+        // Process columns from right to left (second-to-last to first)
+        for (let col = this.grid.cols - 2; col >= 0; col--) {
+            const tile = this.grid.getTile(row, col);
+            if (!tile || !tile.hasItem()) continue;
 
-            if (fromTile && toTile && fromTile.hasItem()) {
-                const item = fromTile.removeItem();
-                if (item) {
-                    toTile.setItem(item);
-                    moves.push({
-                        fromRow: row,
-                        fromCol: fromCol,
-                        toRow: row,
-                        toCol: toCol
-                    });
+            // Find the rightmost empty cell to the right of this one
+            let targetCol = col;
+            for (let checkCol = col + 1; checkCol < this.grid.cols; checkCol++) {
+                const rightTile = this.grid.getTile(row, checkCol);
+                if (rightTile && !rightTile.hasItem()) {
+                    targetCol = checkCol;
+                } else {
+                    break;
+                }
+            }
+
+            // Move item if there's an empty cell to the right
+            if (targetCol !== col) {
+                const targetTile = this.grid.getTile(row, targetCol);
+                if (targetTile) {
+                    const item = tile.removeItem();
+                    if (item) {
+                        targetTile.setItem(item);
+                        moves.push({
+                            fromRow: row,
+                            fromCol: col,
+                            toRow: row,
+                            toCol: targetCol
+                        });
+                    }
                 }
             }
         }
@@ -149,13 +165,15 @@ export class GravitySystem<T extends IGravityCell> {
 
     /**
      * Get all empty cells (for spawning new items)
-     * Returns cells from top to bottom, left to right
+     * Returns cells from right to left, BOTTOM to TOP within each column
      */
     public getEmptyCells(): EmptyCell[] {
         const emptyCells: EmptyCell[] = [];
 
-        for (let col = 0; col < this.grid.cols; col++) {
-            for (let row = 0; row < this.grid.rows; row++) {
+        // Process from right to left
+        for (let col = this.grid.cols - 1; col >= 0; col--) {
+            // Get empty cells from BOTTOM to TOP (fill lowest first)
+            for (let row = this.grid.rows - 1; row >= 0; row--) {
                 const tile = this.grid.getTile(row, col);
                 if (tile && !tile.hasItem()) {
                     emptyCells.push({ row, col });
@@ -168,11 +186,30 @@ export class GravitySystem<T extends IGravityCell> {
 
     /**
      * Apply full gravity cycle: gravity down + shift right
-     * Returns all moves made
+     * Runs until completely stable (no more moves possible)
      */
     public applyFullGravity(): { gravityMoves: GravityMove[]; shiftMoves: GravityMove[] } {
-        const gravityMoves = this.applyGravity();
-        const shiftMoves = this.shiftRight();
+        const gravityMoves: GravityMove[] = [];
+        const shiftMoves: GravityMove[] = [];
+
+        let hasChanges = true;
+        while (hasChanges) {
+            hasChanges = false;
+
+            // Apply gravity (items fall down)
+            const gMoves = this.applyGravity();
+            if (gMoves.length > 0) {
+                hasChanges = true;
+                gravityMoves.push(...gMoves);
+            }
+
+            // Shift right (items move to rightmost empty cell in their row)
+            const sMoves = this.shiftRight();
+            if (sMoves.length > 0) {
+                hasChanges = true;
+                shiftMoves.push(...sMoves);
+            }
+        }
 
         return { gravityMoves, shiftMoves };
     }

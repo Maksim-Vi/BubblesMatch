@@ -58,4 +58,10 @@ export class SceneManager {
     getCurrentScene(): ScreenManagerBase {
         return this.currentScene;
     }
+
+    hideFinishScreen(): void {
+        if (this.finishScreenManager) {
+            this.finishScreenManager.hideScene();
+        }
+    }
 }

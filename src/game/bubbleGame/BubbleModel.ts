@@ -54,6 +54,10 @@ export class BubbleModel extends Model {
         }
     }
 
+    addMove(): void {
+        this._movesLeft++;
+    }
+
     get movesLeft(): number {
         return this._movesLeft;
     }
@@ -88,6 +92,10 @@ export class BubbleModel extends Model {
 
     addScore(points: number): void {
         this._score += points;
+    }
+
+    setScore(value: number): void {
+        this._score = value;
     }
 
     get score(): number {

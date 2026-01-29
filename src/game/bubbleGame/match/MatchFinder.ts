@@ -85,4 +85,58 @@ export class MatchFinder {
     public static isValidMatch(result: MatchResult | null, minCount: number = 2): boolean {
         return result !== null && result.count >= minCount;
     }
+
+    /**
+     * Check if any move (swap) can create a valid match
+     * Returns true if there's at least one possible move that would create a match
+     */
+    public static hasPossibleMoves(grid: BubbleGrid, minCount: number = 2): boolean {
+        // First check if there are already existing matches
+        if (this.hasAnyMatch(grid, minCount)) {
+            return true;
+        }
+
+        // Check if any swap could create a match
+        for (let row = 0; row < grid.rows; row++) {
+            for (let col = 0; col < grid.cols; col++) {
+                const tile = grid.getTile(row, col);
+                if (!tile || !tile.hasItem()) continue;
+
+                // Try swapping with each adjacent tile
+                for (const dir of this.DIRECTIONS) {
+                    const adjRow = row + dir.row;
+                    const adjCol = col + dir.col;
+                    const adjTile = grid.getTile(adjRow, adjCol);
+
+                    if (!adjTile || !adjTile.hasItem()) continue;
+
+                    // Perform swap
+                    const itemA = tile.removeItem()!;
+                    const itemB = adjTile.removeItem()!;
+                    tile.setItem(itemB);
+                    adjTile.setItem(itemA);
+
+                    // Check if swap creates a match at either position
+                    const matchAtTile = this.findConnectedTiles(grid, tile);
+                    const matchAtAdj = this.findConnectedTiles(grid, adjTile);
+
+                    const hasMatch =
+                        (matchAtTile && matchAtTile.count >= minCount) ||
+                        (matchAtAdj && matchAtAdj.count >= minCount);
+
+                    // Undo swap
+                    tile.removeItem();
+                    adjTile.removeItem();
+                    tile.setItem(itemA);
+                    adjTile.setItem(itemB);
+
+                    if (hasMatch) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 }
