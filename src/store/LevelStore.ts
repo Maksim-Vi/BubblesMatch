@@ -37,8 +37,8 @@ export class LevelStore extends Model {
                 gridConfig: {
                     gridWidth: 7,
                     gridHeight: 7,
-                    cellSize: 100,
-                    gap: 8
+                    cellSize: 120,
+                    gap: 10
                 },
                 maxItems: 50,
                 maxMoves: 10,

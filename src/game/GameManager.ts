@@ -1,4 +1,6 @@
 import { Resolve } from "src/core/di/decorators";
+import GlobalDispatcher from "src/events/GlobalDispatcher";
+import { SHOW_FINISH_SCREEN } from "src/events/TypesDispatch";
 import { SceneManager, SceneType } from "src/screens/ScreenManager";
 
 export class GameManager {
@@ -11,10 +13,16 @@ export class GameManager {
 
     init() {
         this.startGame();
+        GlobalDispatcher.add(SHOW_FINISH_SCREEN, this.onShowFinishScreen, this);
+
     }
 
     startGame() {
         this.sceneManager.loadScene(SceneType.LoadingScreen);
+    }
+
+    onShowFinishScreen() {
+        this.sceneManager.loadScene(SceneType.FinishScreen);
     }
 
     changeScene(key: SceneType) {

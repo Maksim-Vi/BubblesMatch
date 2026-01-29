@@ -4,7 +4,7 @@ import GlobalDispatcher from "src/events/GlobalDispatcher";
 import GameSceneModel from "./GameSceneModel";
 import GameSceneView from "./GameSceneView";
 import GameSceneController, { GameType } from "./GameSceneController";
-import { BubbleGameManager } from "src/game/bubbleGame/BubbleGameManager";
+import { START_GAME } from "src/events/TypesDispatch";
 
 export class GameSceneManager extends ScreenManagerBase {
 
@@ -20,7 +20,7 @@ export class GameSceneManager extends ScreenManagerBase {
     }
 
     private eventListeners(): void {
-        GlobalDispatcher.add("START_GAME", this.onStartGame, this);
+        GlobalDispatcher.add(START_GAME, this.onStartGame, this);
     }
 
     private async createController(){

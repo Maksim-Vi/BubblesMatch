@@ -30,13 +30,12 @@ export class FinishScreenManager extends ScreenManagerBase {
         if (!this.finishScreenController) {
             this.createController();
         }
+
+        this.showResult();
     }
 
-    public showResult(isWin: boolean, score: number): void {
-        if (!this.finishScreenController) {
-            this.createController();
-        }
-        this.finishScreenController?.showResult(isWin, score);
+    public showResult(): void {
+        this.finishScreenController?.showResult();
     }
 
     public hideScene(): void {

@@ -41,8 +41,6 @@ export class SceneManager {
             case SceneType.GameScreen:{
                 this.currentScene = this.diContainer.resolve<GameSceneManager>("GameSceneManager");
                 (this.currentScene as GameSceneManager).loadScene();
-                // Initialize finish screen for game scene (it shows as overlay)
-                this.initFinishScreen();
                 break;
             }
             case SceneType.FinishScreen:{
@@ -50,13 +48,6 @@ export class SceneManager {
                 this.finishScreenManager.loadScene();
                 break;
             }
-        }
-    }
-
-    private initFinishScreen(): void {
-        if (!this.finishScreenManager) {
-            this.finishScreenManager = this.diContainer.resolve<FinishScreenManager>("FinishScreenManager");
-            this.finishScreenManager.loadScene();
         }
     }
 

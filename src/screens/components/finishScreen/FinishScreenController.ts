@@ -1,32 +1,22 @@
 import { Controller } from "src/core/mvc/Controller";
 import { FinishScreenModel } from "./FinishScreenModel";
 import { FinishScreenView } from "./FinishScreenView";
-import GlobalDispatcher, { IGDEvent } from "src/events/GlobalDispatcher";
-import { SHOW_FINISH_SCREEN } from "src/events/TypesDispatch";
 import gsap from "gsap";
-
-export interface IFinishScreenData {
-    isWin: boolean;
-    score: number;
-}
+import { FinishStore } from "src/store/FinishStore";
+import { Resolve } from "src/core/di/decorators";
 
 export class FinishScreenController extends Controller<FinishScreenModel, FinishScreenView> {
 
+    @Resolve("FinishStore") private finishStore: FinishStore;
+
     init(): void {
-        GlobalDispatcher.add(SHOW_FINISH_SCREEN, this.onShowFinishScreen, this);
         this.view.alpha = 0;
         this.view.visible = false;
     }
 
-    private onShowFinishScreen = (event: IGDEvent<IFinishScreenData>): void => {
-        if (event.params) {
-            this.showResult(event.params.isWin, event.params.score);
-        }
-    };
-
-    showResult(isWin: boolean, score: number): void {
-        this.model.setResult(isWin, score);
-        this.view.updateResult(isWin, score);
+    showResult(): void {
+        this.model.setResult(this.finishStore.finishData.isWin, this.finishStore.finishData.score);
+        this.view.updateResult(this.finishStore.finishData.isWin, this.finishStore.finishData.score);
         this.show();
     }
 
@@ -51,7 +41,6 @@ export class FinishScreenController extends Controller<FinishScreenModel, Finish
     }
 
     destroy(): void {
-        GlobalDispatcher.remove(SHOW_FINISH_SCREEN, this.onShowFinishScreen);
         this.view.destroyView();
     }
 }

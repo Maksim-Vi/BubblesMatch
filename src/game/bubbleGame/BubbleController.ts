@@ -239,6 +239,11 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
             return;
         }
 
+        if(MatchFinder.hasAnyMatch(this.model.getGrid(), 2)){
+            this.handleWin();
+            return;
+        }
+
         // Check game over (no moves left)
         if (!this.model.hasMovesLeft()) {
             this.handleGameOver();
