@@ -14,6 +14,7 @@ export interface ITileData {
     row: number;
     col: number;
     sizeTile:  number;
+    margin?:  number;
 }
 
 export class Tile extends PIXI.Container {

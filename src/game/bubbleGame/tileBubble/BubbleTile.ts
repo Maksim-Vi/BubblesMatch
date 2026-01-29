@@ -22,7 +22,8 @@ export class BubbleTile extends Tile {
     }
 
     private fitItemToTile(item: Item): void {
-        const availableSize = this.data.sizeTile - BubbleTile.ITEM_MARGIN * 2;
+        const margin = this.data.margin ? this.data.margin : BubbleTile.ITEM_MARGIN;
+        const availableSize = this.data.sizeTile - margin * 2;
         const bounds = item.getLocalBounds();
         const itemSize = Math.max(bounds.width, bounds.height);
 

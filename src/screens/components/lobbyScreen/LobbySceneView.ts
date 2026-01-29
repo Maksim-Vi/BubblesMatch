@@ -1,12 +1,15 @@
-import {View} from "../../../core/mvc/View";
+import { View } from "../../../core/mvc/View";
 import * as PIXI from "pixi.js";
 import GlobalDispatcher from "../../../events/GlobalDispatcher";
 import { ScreenHelper } from "src/core/ScreenHelper";
 import LobbySceneModel from "./LobbySceneModel";
+import { ScaledBackground } from "src/common/ui";
+import AssetsLoader from "src/assetsLoader/AssetsLoader";
+import { START_GAME } from "src/events/TypesDispatch";
 
 export default class LobbySceneView extends View<LobbySceneModel> {
 
-    private _background!: PIXI.Graphics;
+    private _background!: ScaledBackground;
     private _text!: PIXI.Text;
     private playButton!: PIXI.Container;
 
@@ -21,12 +24,11 @@ export default class LobbySceneView extends View<LobbySceneModel> {
         this.createPlayButton();
         this.createInstructions();
     }
-   
+
     private createBackground(): void {
-        const bg = new PIXI.Graphics();
-        bg.rect(0, 0, ScreenHelper.Width, ScreenHelper.Height);
-        bg.fill(0x0f3460);
-        this.addChild(bg);
+        const texture = AssetsLoader.get('bg/bg_loading');
+        this._background = new ScaledBackground(texture);
+        this.addChild(this._background);
     }
 
     private createTitle(): void {
@@ -75,7 +77,7 @@ export default class LobbySceneView extends View<LobbySceneModel> {
         this.playButton.cursor = 'pointer';
 
         this.playButton.on('pointerdown', () => {
-            GlobalDispatcher.dispatch("START_GAME");
+            GlobalDispatcher.dispatch(START_GAME);
         });
 
         this.playButton.on('pointerover', () => {

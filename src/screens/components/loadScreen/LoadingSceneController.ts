@@ -7,6 +7,8 @@ import LoadingSceneModel from "./LoadingSceneModel";
 import LoadingSceneView from "./LoadingSceneView";
 import gsap from "gsap";
 import { SceneManager, SceneType } from "../../ScreenManager";
+import { Assets, Texture } from "pixi.js";
+import { ASSETS_LOAD_START, ASSETS_LOAD_PROGRESS } from "src/events/TypesDispatch";
 
 export default class LoadingSceneController extends Controller<LoadingSceneModel, LoadingSceneView>{
 
@@ -18,18 +20,19 @@ export default class LoadingSceneController extends Controller<LoadingSceneModel
         if (!this.sceneManager)
             this.sceneManager = DI.container.resolve<SceneManager>("SceneManager");
 
-        GlobalDispatcher.add("ASSETS_LOAD_START", this.showScreen, this);
-        GlobalDispatcher.add("ASSETS_LOAD_PROGRESS", this.updateText, this);
+        GlobalDispatcher.add(ASSETS_LOAD_START, this.showScreen, this);
+        GlobalDispatcher.add(ASSETS_LOAD_PROGRESS, this.updateText, this);
 
         this.startLoad();
     }
 
-
-
     async startLoad(){
-        await Promise.all([
-            AssetsLoader.loadAll()
-        ]);
+        // First, load the background image immediately to avoid black screen
+        const bgTexture = await Assets.load<Texture>('assets/bg/bg_loading.jpg');
+        this.view.setBackground(bgTexture);
+
+        // Then load all other assets
+        await AssetsLoader.loadAll();
 
         this.hideScreen();
     }
@@ -43,22 +46,15 @@ export default class LoadingSceneController extends Controller<LoadingSceneModel
     }
 
     hideScreen(){
-        gsap.to(this.view, {
-            duration: 1,
-            alpha: 0,
-            onComplete: () => {
-                this.view.hide();
-                this.sceneManager.loadScene(SceneType.LobbyScreen);
-                this.destroy();
-            }
-        });
+        this.view.hide();
+        this.sceneManager.loadScene(SceneType.LobbyScreen);
+        this.destroy();
     }
 
     destroy(): void {
-        GlobalDispatcher.remove("ASSETS_LOAD_START", this.showScreen);
-        GlobalDispatcher.remove("ASSETS_LOAD_PROGRESS", this.updateText);
+        GlobalDispatcher.remove(ASSETS_LOAD_START, this.showScreen);
+        GlobalDispatcher.remove(ASSETS_LOAD_PROGRESS, this.updateText);
 
-        this.view.destroyView()
-
+        this.view.destroyView();
     }
 }

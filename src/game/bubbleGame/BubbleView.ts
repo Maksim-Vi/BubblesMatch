@@ -1,12 +1,13 @@
-import { Container, Graphics } from "pixi.js";
+import { Container } from "pixi.js";
 import { View } from "src/core/mvc/View";
-import { ScreenHelper } from "src/core/ScreenHelper";
 import { Grid } from "src/common/grid/Grid";
 import { BubbleModel } from "./BubbleModel";
+import { ScaledBackground } from "src/common/ui";
+import AssetsLoader from "src/assetsLoader/AssetsLoader";
 
 export class BubbleView extends View<BubbleModel> {
-    private gridBackgroundContainer!: Container;
-    private tilesContainer!: Container;
+    private _background!: ScaledBackground;
+    private _uiContainer!: Container;
 
     constructor() {
         super();
@@ -15,18 +16,24 @@ export class BubbleView extends View<BubbleModel> {
 
     create(): void {
         this.createBackground();
-        this.createUI();
+        this.createUIContainer();
     }
 
     private createBackground(): void {
-        const bg = new Graphics();
-        bg.rect(0, 0, ScreenHelper.Width, ScreenHelper.Height);
-        bg.fill(0x1a1a2e);
-        this.addChild(bg);
+        // Randomly select between bg_1 and bg_2
+        const bgKey = Math.random() < 0.5 ? 'bg/bg_1' : 'bg/bg_2';
+        const texture = AssetsLoader.get(bgKey);
+        this._background = new ScaledBackground(texture);
+        this.addChild(this._background);
     }
 
-    private createUI(): void {
+    private createUIContainer(): void {
+        this._uiContainer = new Container();
+        this.addChild(this._uiContainer);
+    }
 
+    get uiContainer(): Container {
+        return this._uiContainer;
     }
 
     initializeGrid(grid: Grid): void {
@@ -34,8 +41,12 @@ export class BubbleView extends View<BubbleModel> {
     }
 
     destroyView(): void {
-        this.gridBackgroundContainer.removeChildren();
-        this.tilesContainer.removeChildren();
+        if (this._background) {
+            this._background.destroy();
+        }
+        if (this._uiContainer) {
+            this._uiContainer.removeChildren();
+        }
         this.removeChildren();
     }
 }

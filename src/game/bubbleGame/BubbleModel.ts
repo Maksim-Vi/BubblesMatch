@@ -21,28 +21,53 @@ export class BubbleModel extends Model {
 
     private grid: BubbleGrid;
     private _levelConfig: ILevelConfig;
-    private state: GameState = GameState.IDLE;
+    private _state: GameState = GameState.IDLE;
     private _score: number = 0;
     private _multiplier: number = 1;
     private _spawnedItems: number = 0;
+    private _movesLeft: number = 0;
 
     init(): void {
-        this.state = GameState.IDLE;
+        this._state = GameState.IDLE;
         this._score = 0;
         this._multiplier = 1;
         this._spawnedItems = 0;
+        this._movesLeft = 0;
     }
 
     initLevel(levelConfig: ILevelConfig): void {
         this._levelConfig = levelConfig;
-        this.state = GameState.IDLE;
+        this._state = GameState.PLAYER_INPUT;
         this._score = 0;
         this._multiplier = 1;
         this._spawnedItems = 0;
+        this._movesLeft = levelConfig.maxMoves;
 
         const gridConfig = this.levelConfig.gridConfig;
 
         this.grid = new BubbleGrid(gridConfig.gridWidth, gridConfig.gridHeight, gridConfig.cellSize, gridConfig.gap);
+    }
+
+    useMove(): void {
+        if (this._movesLeft > 0) {
+            this._movesLeft--;
+        }
+    }
+
+    get movesLeft(): number {
+        return this._movesLeft;
+    }
+
+    get maxMoves(): number {
+        return this._levelConfig?.maxMoves ?? 0;
+    }
+
+    hasMovesLeft(): boolean {
+        return this._movesLeft > 0;
+    }
+
+    setGameState(state: GameState): void {
+        this._state = state;
     }
 
     incrementSpawnedItems(): void {
@@ -96,7 +121,7 @@ export class BubbleModel extends Model {
     }
     
     get gameCurrentState(): GameState {
-        return this.state;
+        return this._state;
     }
 
     destroy(): void {

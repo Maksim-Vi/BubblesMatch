@@ -1,5 +1,5 @@
 import { Controller } from "src/core/mvc/Controller";
-import { BubbleModel } from "./BubbleModel";
+import { BubbleModel, GameState } from "./BubbleModel";
 import { BubbleView } from "./BubbleView";
 import GlobalDispatcher from "src/events/GlobalDispatcher";
 import { BubbleTile } from "./tileBubble/BubbleTile";
@@ -12,6 +12,8 @@ import { MatchFinder } from "./match/MatchFinder";
 import { ScoreCalculator } from "./match/ScoreCalculator";
 import { GravitySystem, GravityMove } from "src/game/bubbleGame/gravity";
 import gsap from "gsap";
+import { LeftTableController, LeftTableModel, LeftTableView } from "./leftTable";
+import { SCORE_UPDATED, MOVES_UPDATED, GAME_WIN, GAME_OVER, SHOW_FINISH_SCREEN } from "src/events/TypesDispatch";
 
 interface TileSwipeExtra {
     tile: BubbleTile;
@@ -23,19 +25,147 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     private swipeSystem: SwipeSystem<BubbleTile, TileSwipeExtra>;
     private clickSystem: ClickSystem<BubbleTile>;
     private gravitySystem: GravitySystem<BubbleTile>;
+    private leftTableController: LeftTableController;
     private readonly MIN_MATCH_COUNT = 2;
     private isAnimating: boolean = false;
 
     init(): void {
         this.setupSwipeSystem();
         this.setupClickSystem();
-        this.fillGrid();
+        this.setupLeftTable();
+        this.initGrid();
+    }
+
+    private setupLeftTable(): void {
+        const leftTableModel = new LeftTableModel();
+        const leftTableView = new LeftTableView();
+        this.leftTableController = new LeftTableController(leftTableModel, leftTableView);
+        this.leftTableController.init();
+
+        // View handles its own positioning (left side, centered vertically)
+        this.view.addChild(leftTableView);
+
+        // Set initial data from level config
+        if (this.model.levelConfig) {
+            this.leftTableController.setInitialData(this.model.levelConfig.maxMoves);
+        }
+    }
+
+    private dispatchScoreUpdate(): void {
+        GlobalDispatcher.dispatch(SCORE_UPDATED, { score: this.model.score });
+    }
+
+    private dispatchMovesUpdate(): void {
+        GlobalDispatcher.dispatch(MOVES_UPDATED, {
+            movesLeft: this.model.movesLeft,
+            maxMoves: this.model.maxMoves
+        });
+    }
+
+    private async initGrid(): Promise<void> {
+        this.createEmptyGrid();
         this.gravitySystem = new GravitySystem(this.model.getGrid());
+        await this.fillGridAnimated();
+    }
+
+    private createEmptyGrid(): void {
+        if (!this.model.levelConfig) {
+            return alert("Can not find level to play!");
+        }
+
+        const bubbleGrid = this.model.getGrid();
+
+        for (let row = 0; row < bubbleGrid.rows; row++) {
+            for (let col = 0; col < bubbleGrid.cols; col++) {
+                if (!bubbleGrid.getTile(row, col)) {
+                    const tile = this.createEmptyTile(row, col);
+                    bubbleGrid.setTile(row, col, tile);
+                }
+            }
+        }
+
+        bubbleGrid.position.set(
+            ScreenHelper.Center.x - bubbleGrid.gridWidth / 2,
+            ScreenHelper.Center.y - bubbleGrid.gridHeight / 2
+        );
+        this.view.initializeGrid(bubbleGrid);
+    }
+
+    private createEmptyTile(row: number, col: number): BubbleTile {
+        const gridConfig = this.model.levelConfig.gridConfig;
+        const tileData: ITileData = {
+            color: TileColor.RED,
+            row: row,
+            col: col,
+            sizeTile: gridConfig.cellSize,
+            margin: 8,
+        };
+        const tile = new BubbleTile(tileData);
+
+        this.swipeSystem.attach(tile);
+        this.clickSystem.attach(tile);
+
+        return tile;
+    }
+
+    private async fillGridAnimated(): Promise<void> {
+        this.isAnimating = true;
+        const grid = this.model.getGrid();
+        const itemsToAnimate: { item: Item; tile: BubbleTile; row: number; col: number }[] = [];
+
+        // Create items for all cells, column by column (right to left)
+        for (let col = grid.cols - 1; col >= 0; col--) {
+            for (let row = 0; row < grid.rows; row++) {
+                const tile = grid.getTile(row, col);
+                if (tile && !tile.hasItem()) {
+                    const randomColor = this.getRandomColor(this.availableColors);
+                    const item = this.createItem(randomColor);
+
+                    tile.setItem(item);
+                    this.model.incrementSpawnedItems();
+
+                    // Hide item initially and position above grid
+                    item.alpha = 0;
+                    const gap = this.model.levelConfig.gridConfig.gap;
+                    const fallDistance = (row + 1) * (tile.data.sizeTile + gap);
+                    item.y = tile.data.sizeTile / 2 - fallDistance;
+
+                    itemsToAnimate.push({ item, tile, row, col });
+                }
+            }
+        }
+
+        // Animate items falling column by column
+        if (itemsToAnimate.length > 0) {
+            await new Promise<void>((resolve) => {
+                const tl = gsap.timeline({ onComplete: resolve });
+
+                itemsToAnimate.forEach(({ item, tile, row, col }) => {
+                    const targetY = tile.data.sizeTile / 2;
+                    // Stagger by column first, then by row
+                    const colDelay = (grid.cols - 1 - col) * 0.08;
+                    const rowDelay = row * 0.03;
+                    const delay = colDelay + rowDelay;
+                    const duration = 0.35 + row * 0.02;
+
+                    // Show item and animate fall
+                    tl.set(item, { alpha: 1 }, delay);
+                    tl.to(item, {
+                        y: targetY,
+                        duration,
+                        ease: "power2.out"
+                    }, delay);
+                });
+            });
+        }
+
+        this.isAnimating = false;
+        console.log(`Grid filled with ${itemsToAnimate.length} items`);
     }
 
     private setupSwipeSystem(): void {
         this.swipeSystem = new SwipeSystem<BubbleTile, TileSwipeExtra>({
-            canSwipe: (tile) => !this.isAnimating && tile.hasItem(),
+            canSwipe: (tile) => !this.isAnimating && tile.hasItem() && this.model.gameCurrentState === GameState.PLAYER_INPUT,
             getExtra: (tile) => ({ tile }),
             onSwipe: (tile, _direction, vector) => {
                 this.trySwapInDirection(tile, vector);
@@ -45,7 +175,7 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
 
     private setupClickSystem(): void {
         this.clickSystem = new ClickSystem<BubbleTile>({
-            canClick: (tile) => !this.isAnimating && tile.hasItem(),
+            canClick: (tile) => !this.isAnimating && tile.hasItem() && this.model.gameCurrentState === GameState.PLAYER_INPUT,
             onDoubleClick: (tile) => {
                 this.tryCollectMatch(tile);
             }
@@ -53,6 +183,11 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     }
 
     private tryCollectMatch(tile: BubbleTile): void {
+        if (!this.model.hasMovesLeft()) {
+            console.log("No moves left!");
+            return;
+        }
+
         const grid = this.model.getGrid();
         const matchResult = MatchFinder.findConnectedTiles(grid, tile);
 
@@ -61,43 +196,117 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
             return;
         }
 
+        // Use a move
+        this.model.useMove();
+        this.dispatchMovesUpdate();
+        console.log(`Moves left: ${this.model.movesLeft}/${this.model.maxMoves}`);
+
         const scoreResult = ScoreCalculator.calculate(matchResult!.count, this.model.multiplier);
         this.model.addScore(scoreResult.totalScore);
+        this.dispatchScoreUpdate();
 
         console.log(`Collected ${matchResult!.count} ${TileColor[matchResult!.color]} items! Score: +${scoreResult.totalScore} (Total: ${this.model.score})`);
 
         // Cancel any active swipe to prevent accidental moves after collection
         this.swipeSystem.cancel();
 
-        // Remove collected items
-        for (const matchedTile of matchResult!.tiles) {
-            const item = matchedTile.removeItem();
+        // Remove collected items with animation
+        this.collectAndRefill(matchResult!.tiles);
+    }
+
+    private async collectAndRefill(tiles: BubbleTile[]): Promise<void> {
+        this.isAnimating = true;
+
+        // Animate collected items disappearing
+        await this.animateCollect(tiles);
+
+        // Remove items after animation
+        for (const tile of tiles) {
+            const item = tile.removeItem();
             if (item) {
                 item.destroy();
             }
         }
 
-        // Apply gravity and fill empty cells
-        this.applyGravityAndRefill();
+        // Apply gravity and refill
+        await this.applyGravityAndRefill();
+
+        this.isAnimating = false;
+
+        // Check win condition (grid is empty)
+        if (this.isGridEmpty()) {
+            this.handleWin();
+            return;
+        }
+
+        // Check game over (no moves left)
+        if (!this.model.hasMovesLeft()) {
+            this.handleGameOver();
+        }
+    }
+
+    private isGridEmpty(): boolean {
+        const grid = this.model.getGrid();
+        for (let row = 0; row < grid.rows; row++) {
+            for (let col = 0; col < grid.cols; col++) {
+                const tile = grid.getTile(row, col);
+                if (tile?.hasItem()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private handleWin(): void {
+        console.log("=== YOU WIN! ===");
+        console.log(`Final Score: ${this.model.score}`);
+        console.log(`Moves Used: ${this.model.maxMoves - this.model.movesLeft}/${this.model.maxMoves}`);
+        console.log(`Items Spawned: ${this.model.spawnedItems}/${this.model.maxItems}`);
+
+        this.model.setGameState(GameState.LEVEL_COMPLETE);
+
+        GlobalDispatcher.dispatch(GAME_WIN, { score: this.model.score });
+        GlobalDispatcher.dispatch(SHOW_FINISH_SCREEN, {
+            isWin: true,
+            score: this.model.score
+        });
+    }
+
+    private animateCollect(tiles: BubbleTile[]): Promise<void> {
+        return new Promise((resolve) => {
+            const items = tiles.map(t => t.getItem()).filter(Boolean) as Item[];
+
+            if (items.length === 0) {
+                resolve();
+                return;
+            }
+
+            const tl = gsap.timeline({ onComplete: resolve });
+            items.forEach((item, index) => {
+                tl.to(item.scale, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.15,
+                    ease: "back.in(2)"
+                }, index * 0.02);
+            });
+        });
     }
 
     private async applyGravityAndRefill(): Promise<void> {
-        this.isAnimating = true;
-
         // Apply gravity (items fall down) with animation
         const gravityMoves = this.gravitySystem.applyGravity();
-        await this.animateMoves(gravityMoves, 0.15, 0.03);
+        await this.animateMoves(gravityMoves, 0.25, 0.04);
 
         // Shift right with animation
         const shiftMoves = this.gravitySystem.shiftRight();
-        await this.animateMoves(shiftMoves, 0.12, 0.02);
+        await this.animateMoves(shiftMoves, 0.2, 0.03);
 
         console.log(`Gravity: ${gravityMoves.length} falls, ${shiftMoves.length} shifts`);
 
-        // Fill empty cells with new items
+        // Fill empty cells with new items (falling from top)
         await this.fillEmptyCellsAnimated();
-
-        this.isAnimating = false;
     }
 
     private animateMoves(moves: GravityMove[], duration: number, stagger: number): Promise<void> {
@@ -115,17 +324,14 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
                 const item = targetTile?.getItem();
 
                 if (item) {
-                    // Calculate offset from source position
                     const sourceTile = grid.getTile(move.fromRow, move.fromCol);
                     if (sourceTile && targetTile) {
                         const offsetX = sourceTile.x - targetTile.x;
                         const offsetY = sourceTile.y - targetTile.y;
 
-                        // Set item to source position (relative to its parent tile)
                         item.x += offsetX;
                         item.y += offsetY;
 
-                        // Animate back to center of tile
                         tl.to(item, {
                             x: targetTile.data.sizeTile / 2,
                             y: targetTile.data.sizeTile / 2,
@@ -135,10 +341,6 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
                     }
                 }
             });
-
-            if (moves.length === 0) {
-                resolve();
-            }
         });
     }
 
@@ -147,7 +349,7 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
         const grid = this.model.getGrid();
         let spawnedCount = 0;
 
-        const itemsToAnimate: { item: Item; targetScale: number }[] = [];
+        const itemsToAnimate: { item: Item; tile: BubbleTile; row: number }[] = [];
 
         for (const { row, col } of emptyCells) {
             if (!this.model.canSpawnMore()) {
@@ -161,28 +363,36 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
                 const item = this.createItem(randomColor);
 
                 tile.setItem(item);
-
-                // Save target scale and set to 0 for pop-in animation
-                const targetScale = item.scale.x;
-                item.scale.set(0);
-
                 this.model.incrementSpawnedItems();
-                itemsToAnimate.push({ item, targetScale });
+
+                // Hide item initially and position above grid
+                item.alpha = 0;
+                const gap = this.model.levelConfig.gridConfig.gap;
+                const fallDistance = (row + 1) * (tile.data.sizeTile + gap);
+                item.y = tile.data.sizeTile / 2 - fallDistance;
+
+                itemsToAnimate.push({ item, tile, row });
                 spawnedCount++;
             }
         }
 
-        // Animate all new items with stagger
+        // Animate items falling
         if (itemsToAnimate.length > 0) {
             await new Promise<void>((resolve) => {
                 const tl = gsap.timeline({ onComplete: resolve });
-                itemsToAnimate.forEach(({ item, targetScale }, index) => {
-                    tl.to(item.scale, {
-                        x: targetScale,
-                        y: targetScale,
-                        duration: 0.2,
-                        ease: "back.out(1.5)"
-                    }, index * 0.02);
+
+                itemsToAnimate.forEach(({ item, tile, row }, index) => {
+                    const targetY = tile.data.sizeTile / 2;
+                    const duration = 0.3 + row * 0.02;
+                    const delay = index * 0.04;
+
+                    // Show item and animate fall
+                    tl.set(item, { alpha: 1 }, delay);
+                    tl.to(item, {
+                        y: targetY,
+                        duration,
+                        ease: "power2.out"
+                    }, delay);
                 });
             });
         }
@@ -190,52 +400,68 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
         console.log(`Filled ${spawnedCount} empty cells (Total spawned: ${this.model.spawnedItems}/${this.model.maxItems})`);
     }
 
-    private fillGrid() {
-        if (!this.model.levelConfig) {
-            return alert("Can not find level to play!");
-        }
+    private async handleGameOver(): Promise<void> {
+        console.log("=== GAME OVER ===");
+        console.log(`Final Score: ${this.model.score}`);
+        console.log(`Items Spawned: ${this.model.spawnedItems}/${this.model.maxItems}`);
 
-        const bubbleGrid = this.model.getGrid();
+        this.model.setGameState(GameState.GAME_OVER);
 
-        for (let row = 0; row < bubbleGrid.rows; row++) {
-            for (let col = 0; col < bubbleGrid.cols; col++) {
-                if (!bubbleGrid.getTile(row, col)) {
-                    const tile = this.createBubbleTile(row, col);
-                    bubbleGrid.setTile(row, col, tile);
+        // Clear the grid with animation
+        await this.clearGridAnimated();
+
+        GlobalDispatcher.dispatch(GAME_OVER, { score: this.model.score });
+        GlobalDispatcher.dispatch(SHOW_FINISH_SCREEN, {
+            isWin: false,
+            score: this.model.score
+        });
+    }
+
+    private async clearGridAnimated(): Promise<void> {
+        const grid = this.model.getGrid();
+        const itemsToAnimate: Item[] = [];
+
+        for (let row = 0; row < grid.rows; row++) {
+            for (let col = 0; col < grid.cols; col++) {
+                const tile = grid.getTile(row, col);
+                const item = tile?.getItem();
+                if (item) {
+                    itemsToAnimate.push(item);
                 }
             }
         }
 
-        bubbleGrid.position.set(
-            ScreenHelper.Center.x - bubbleGrid.gridWidth / 2,
-            ScreenHelper.Center.y - bubbleGrid.gridHeight / 2
-        );
-        this.view.initializeGrid(bubbleGrid);
+        if (itemsToAnimate.length > 0) {
+            await new Promise<void>((resolve) => {
+                const tl = gsap.timeline({ onComplete: resolve });
+
+                itemsToAnimate.forEach((item, index) => {
+                    tl.to(item, {
+                        y: item.y + 500,
+                        alpha: 0,
+                        duration: 0.4,
+                        ease: "power2.in"
+                    }, index * 0.02);
+                });
+            });
+
+            // Remove all items
+            for (let row = 0; row < grid.rows; row++) {
+                for (let col = 0; col < grid.cols; col++) {
+                    const tile = grid.getTile(row, col);
+                    const item = tile?.removeItem();
+                    if (item) {
+                        item.destroy();
+                    }
+                }
+            }
+        }
+
+        console.log("Grid cleared");
     }
 
     private getRandomColor(colors: TileColor[]): TileColor {
         return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    private createBubbleTile(row: number, col: number): BubbleTile {
-        const randomColor = this.getRandomColor(this.availableColors);
-
-        const tileData: ITileData = {
-            color: randomColor,
-            row: row,
-            col: col,
-            sizeTile: 82
-        };
-        const tile = new BubbleTile(tileData);
-
-        const item = this.createItem(randomColor);
-        tile.setItem(item);
-        this.model.incrementSpawnedItems();
-
-        this.swipeSystem.attach(tile);
-        this.clickSystem.attach(tile);
-
-        return tile;
     }
 
     private trySwapInDirection(fromTile: BubbleTile, direction: SwipeVector): void {
@@ -270,6 +496,9 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     destroy(): void {
         this.swipeSystem.destroy();
         this.clickSystem.destroy();
+        if (this.leftTableController) {
+            this.leftTableController.destroy();
+        }
         GlobalDispatcher.removeAllForContext(this);
     }
 }

@@ -37,11 +37,11 @@ export class LevelStore extends Model {
                 gridConfig: {
                     gridWidth: 7,
                     gridHeight: 7,
-                    cellSize: 82,
-                    gap: 3
+                    cellSize: 100,
+                    gap: 8
                 },
-                maxItems: 500,
-                maxMoves: 50,
+                maxItems: 50,
+                maxMoves: 10,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE],
             },
         ];

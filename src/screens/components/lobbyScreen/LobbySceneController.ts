@@ -5,13 +5,14 @@ import { SceneType } from "src/screens/ScreenManager";
 import { GameManager } from "src/game/GameManager";
 import LobbySceneModel from "./LobbySceneModel";
 import LobbySceneView from "./LobbySceneView";
+import { START_GAME } from "src/events/TypesDispatch";
 
 export default class LobbySceneController extends Controller<LobbySceneModel, LobbySceneView>{
-   
+
     @Resolve("GameManager") private gameManager: GameManager;
 
     async init() {
-        GlobalDispatcher.add("START_GAME", this.startGame, this);
+        GlobalDispatcher.add(START_GAME, this.startGame, this);
     }
 
     startGame(){
@@ -28,6 +29,7 @@ export default class LobbySceneController extends Controller<LobbySceneModel, Lo
     }
 
     destroy(): void {
-        this.view.destroyView()
+        GlobalDispatcher.remove(START_GAME, this.startGame);
+        this.view.destroyView();
     }
 }
