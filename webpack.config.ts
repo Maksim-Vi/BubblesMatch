@@ -62,6 +62,7 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [
+                { from: "public/manifest.json", to: "manifest.json" },
                 { from: "public/assets", to: "assets" } // копіюємо assets та assets.json
             ],
         }),
