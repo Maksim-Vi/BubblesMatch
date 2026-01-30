@@ -35,6 +35,6 @@ export default class GameSceneController extends Controller<GameSceneModel, Game
     }
 
     destroy(): void {
-        this.view.destroyView()
+        this.view.destroyView();
     }
 }

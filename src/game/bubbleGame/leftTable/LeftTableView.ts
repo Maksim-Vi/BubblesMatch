@@ -10,6 +10,7 @@ import { RESIZE_APP } from "src/events/TypesDispatch";
 export class LeftTableView extends View<LeftTableModel> {
     private _panel!: NineSlicePanel;
     private _scoreText!: Text;
+    private _scoreCountText!: Text;
     private _movesText!: Text;
     private _container!: Container;
 
@@ -70,12 +71,20 @@ export class LeftTableView extends View<LeftTableModel> {
         });
 
         this._scoreText = new Text({
-            text: 'Score: 0',
+            text: 'Score:',
             style
         });
         this._scoreText.anchor.set(0.5, 0);
         this._scoreText.position.set(this.PANEL_WIDTH / 2, 50);
         this._container.addChild(this._scoreText);
+
+        this._scoreCountText = new Text({
+            text: '0 / 0',
+            style
+        });
+        this._scoreCountText.anchor.set(0.5, 0);
+        this._scoreCountText.position.set(this.PANEL_WIDTH / 2, 100);
+        this._container.addChild(this._scoreCountText);
     }
 
     private createMovesText(): void {
@@ -111,8 +120,8 @@ export class LeftTableView extends View<LeftTableModel> {
         this.position.set(this.MARGIN_LEFT, centerY);
     };
 
-    updateScore(score: number): void {
-        this._scoreText.text = `Score: ${score}`;
+    updateScore(score: number, needScore: number): void {
+       this._scoreCountText.text = `${score} / ${needScore}`;
     }
 
     updateMoves(movesLeft: number, maxMoves: number): void {
@@ -121,6 +130,6 @@ export class LeftTableView extends View<LeftTableModel> {
 
     destroyView(): void {
         GlobalDispatcher.remove(RESIZE_APP, this.updateLayout);
-        this.destroy({ children: true });
+        this.destroy();
     }
 }

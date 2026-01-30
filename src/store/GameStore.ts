@@ -1,5 +1,6 @@
-import GlobalDispatcher from "src/events/GlobalDispatcher";
-import { GAME_WIN } from "src/events/TypesDispatch";
+import GlobalDispatcher, { IGDEvent } from "src/events/GlobalDispatcher";
+import { GAME_OVER, GAME_WIN, MOVES_UPDATED, SCORE_UPDATED } from "src/events/TypesDispatch";
+import { IObstacleConfig } from "./LevelStore";
 
 const STORAGE_KEY = 'bubbleMatch_progress';
 
@@ -10,6 +11,9 @@ export interface IGameProgress {
 
 export class GameStore {
     private _progress: IGameProgress;
+    
+    private currentObstacle: IObstacleConfig; 
+    private updatedDataObstacle: IObstacleConfig = { collectScores: 0, maxMoves: 0, collectColors: null }; 
 
     constructor() {
         this._progress = this.loadProgress();
@@ -21,7 +25,44 @@ export class GameStore {
     }
 
     private eventListeners(): void {
+        GlobalDispatcher.add(GAME_OVER, this.onFinishGame, this);
         GlobalDispatcher.add(GAME_WIN, this.onLevelComplete, this);
+        GlobalDispatcher.add(SCORE_UPDATED, this.setObstacleScoresData, this);
+
+        GlobalDispatcher.add(MOVES_UPDATED, this.setObstacleMovesData, this);
+    }
+
+    public setCurrentObstacleData(currentObstacle: IObstacleConfig){
+        // Store a copy to not corrupt original level data
+        this.currentObstacle = { ...currentObstacle };
+        // Reset updated data for the new game
+        this.updatedDataObstacle = {
+            collectScores: 0,
+            maxMoves: currentObstacle.maxMoves,
+            collectColors: null
+        };
+    }
+
+    private setObstacleScoresData(event: IGDEvent<{ score: number }>) {
+        if (event.params) {
+            this.updatedDataObstacle.collectScores = event.params.score;
+        }
+    }
+
+    private setObstacleMovesData(event: IGDEvent<{ movesLeft: number, maxMoves: number }>){
+        if (event.params) {
+            this.updatedDataObstacle.maxMoves = event.params.movesLeft;
+        }
+    }
+
+    public checkIsLoseObstacle(): boolean {
+        // Check if player hasn't collected enough score with remaining moves
+        return this.updatedDataObstacle.collectScores < this.currentObstacle.collectScores;
+    }
+
+    private clearObstacleData(){
+        this.currentObstacle = { collectScores: 0, maxMoves: 0, collectColors: null };
+        this.updatedDataObstacle = { collectScores: 0, maxMoves: 0, collectColors: null };
     }
 
     private loadProgress(): IGameProgress {
@@ -49,7 +90,14 @@ export class GameStore {
             this._progress.unlockedLevel = Math.min(this._progress.currentLevel + 1, 10);
             this.saveProgress();
         }
+
+        this.onFinishGame();
     }
+
+    private onFinishGame() {
+        this.clearObstacleData();
+    }
+
 
     get currentLevel(): number {
         return this._progress.currentLevel;

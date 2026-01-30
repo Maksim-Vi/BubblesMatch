@@ -41,7 +41,7 @@ export class BubbleModel extends Model {
         this._score = 0;
         this._multiplier = 1;
         this._spawnedItems = 0;
-        this._movesLeft = levelConfig.maxMoves;
+        this._movesLeft = levelConfig.obstacles.maxMoves;
 
         const gridConfig = this.levelConfig.gridConfig;
 
@@ -54,8 +54,8 @@ export class BubbleModel extends Model {
         }
     }
 
-    addMove(): void {
-        this._movesLeft++;
+    addMove(value: number = 1): void {
+        this._movesLeft += value;
     }
 
     get movesLeft(): number {
@@ -63,7 +63,7 @@ export class BubbleModel extends Model {
     }
 
     get maxMoves(): number {
-        return this._levelConfig?.maxMoves ?? 0;
+        return this._levelConfig?.obstacles.maxMoves ?? 0;
     }
 
     hasMovesLeft(): boolean {

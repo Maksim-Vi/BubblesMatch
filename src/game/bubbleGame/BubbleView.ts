@@ -62,13 +62,11 @@ export class BubbleView extends View<BubbleModel> {
         xText.anchor.set(0.5);
         this._exitButton.addChild(xText);
 
-        // Position in top right corner
         this._exitButton.position.set(
-            ScreenHelper.Width - padding - size / 2,
-            padding + size / 2
+            ScreenHelper.TopRight.x - padding - size / 2,
+            ScreenHelper.TopRight.y + padding + size / 2
         );
 
-        // Hover effects
         this._exitButton.on('pointerover', () => {
             this._exitButton.scale.set(1.1);
             bg.tint = 0xFF3333;
@@ -96,12 +94,6 @@ export class BubbleView extends View<BubbleModel> {
     }
 
     destroyView(): void {
-        if (this._background) {
-            this._background.destroy();
-        }
-        if (this._uiContainer) {
-            this._uiContainer.removeChildren();
-        }
-        this.removeChildren();
+        this.destroy();
     }
 }

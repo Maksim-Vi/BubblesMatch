@@ -148,6 +148,9 @@ export class AnimationHelper {
             const tl = gsap.timeline({ onComplete: resolve });
 
             items.forEach((item, index) => {
+                // Check if item is still valid (not destroyed)
+                if (!item || item.destroyed) return;
+
                 tl.to(item.scale, {
                     x: 0,
                     y: 0,
@@ -168,6 +171,10 @@ export class AnimationHelper {
     ): Promise<void> {
         return new Promise((resolve) => {
             if (moves.length === 0) {
+                resolve();
+                return;
+            }
+            if (!grid) {
                 resolve();
                 return;
             }
@@ -210,6 +217,8 @@ export class AnimationHelper {
         grid: BubbleGrid,
         config: Partial<AnimationConfig> = {}
     ): Promise<void> {
+        if(!grid) return Promise.resolve();
+
         return new Promise((resolve) => {
             const itemsToAnimate: Item[] = [];
 
@@ -232,8 +241,12 @@ export class AnimationHelper {
             const tl = gsap.timeline({ onComplete: resolve });
 
             itemsToAnimate.forEach((item, index) => {
+                // Check if item is still valid (not destroyed)
+                if (!item || item.destroyed) return;
+
+                const targetY = item.y + 500;
                 tl.to(item, {
-                    y: item.y + 500,
+                    y: targetY,
                     alpha: 0,
                     duration,
                     ease
@@ -251,6 +264,8 @@ export class AnimationHelper {
         duration: number = 0.2,
         ease: string = "power2.out"
     ): Promise<void> {
+        if(!target) return Promise.resolve();
+
         return new Promise((resolve) => {
             gsap.to(target.scale, {
                 x: toScale,
@@ -270,6 +285,8 @@ export class AnimationHelper {
         bounceScale: number = 1.2,
         duration: number = 0.3
     ): Promise<void> {
+        if(!target) return Promise.resolve();
+
         return new Promise((resolve) => {
             const tl = gsap.timeline({ onComplete: resolve });
             tl.to(target.scale, {
@@ -295,6 +312,8 @@ export class AnimationHelper {
         duration: number = 0.3,
         ease: string = "power2.out"
     ): Promise<void> {
+        if(!target) return Promise.resolve();
+
         return new Promise((resolve) => {
             gsap.to(target, {
                 alpha: 1,
@@ -313,6 +332,8 @@ export class AnimationHelper {
         duration: number = 0.3,
         ease: string = "power2.in"
     ): Promise<void> {
+        if(!target) return Promise.resolve();
+
         return new Promise((resolve) => {
             gsap.to(target, {
                 alpha: 0,
@@ -331,6 +352,8 @@ export class AnimationHelper {
         intensity: number = 10,
         duration: number = 0.4
     ): Promise<void> {
+        if(!target) return Promise.resolve();
+
         return new Promise((resolve) => {
             const originalX = target.x;
             const tl = gsap.timeline({ onComplete: resolve });
@@ -341,5 +364,10 @@ export class AnimationHelper {
             tl.to(target, { x: originalX + intensity * 0.6, duration: duration * 0.1 });
             tl.to(target, { x: originalX, duration: duration * 0.2 });
         });
+    }
+
+    static destroy(): void {
+        // Kill all GSAP animations globally to prevent accessing destroyed objects
+        gsap.globalTimeline.clear();
     }
 }

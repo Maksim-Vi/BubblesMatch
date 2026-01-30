@@ -9,6 +9,10 @@ export enum ScaleMode {
     STRETCH = "stretch"
 }
 
+export type RendererBackground =
+    | { type: "color"; value: number | string }
+    | { type: "image"; src: string };
+
 export interface IGameConfig {
     /**
      * Логічна ширина гри в пікселях
@@ -38,7 +42,7 @@ export interface IGameConfig {
         /**
          * Колір фону (hex)
          */
-        background: number;
+        background?: RendererBackground;
 
         /**
          * Увімкнути антиаліасинг
@@ -86,7 +90,7 @@ export interface IGameConfig {
         /**
          * CSS background для контейнера
          */
-        cssBackground: string;
+        cssBackground: RendererBackground;
 
         /**
          * Border radius для контейнера
@@ -140,16 +144,16 @@ export const MOBILE_PORTRAIT_CONFIG: IGameConfig = {
     orientation: Orientation.PORTRAIT,
     scaleMode: ScaleMode.FIT,
     renderer: {
-        background: 0x000000,
+        background: {type: "color", value: 0x000000},
         antialias: true,
         maxResolution: 2,
         autoDensity: true,
         autoStart: true
     },
     container: {
-         width: "min(100vw, 100vh * (16 / 9))",
+        width: "min(100vw, 100vh * (16 / 9))",
         height: "min(100vh, 100vw / (16 / 9))",
-        cssBackground: "#ffffff",
+        cssBackground: {type: "color", value: "#ffffff"},
         borderRadius: "0px",
         position: "fixed",
         fullscreen: true
@@ -170,7 +174,7 @@ export const DESKTOP_CONFIG: IGameConfig = {
     orientation: Orientation.LANDSCAPE,
     scaleMode: ScaleMode.FIT,
     renderer: {
-        background: 0x1a1a1a,
+        background: {type: "color", value: 0x1a1a1a},
         antialias: true,
         maxResolution: 2,
         autoDensity: true,
@@ -179,7 +183,7 @@ export const DESKTOP_CONFIG: IGameConfig = {
     container: {
         width: "min(100vw, 100vh * (16 / 9))",
         height: "min(100vh, 100vw / (16 / 9))",
-        cssBackground: "#2a2a2a",
+        cssBackground: {type: "color", value: "#ffffff"},
         borderRadius: "8px",
         position: "relative",
         fullscreen: false
@@ -200,7 +204,7 @@ export const FIXED_SIZE_CONFIG: IGameConfig = {
     orientation: Orientation.LANDSCAPE,
     scaleMode: ScaleMode.FIT,
     renderer: {
-        background: 0x333333,
+        background: {type: "color", value: 0x333333},
         antialias: true,
         maxResolution: 1,
         autoDensity: true,
@@ -209,7 +213,7 @@ export const FIXED_SIZE_CONFIG: IGameConfig = {
     container: {
         width: "800px",
         height: "600px",
-        cssBackground: "#444444",
+        cssBackground: {type: "color", value: "#ffffff"},
         borderRadius: "4px",
         position: "relative",
         fullscreen: false
@@ -230,7 +234,7 @@ export const FULLSCREEN_CONFIG: IGameConfig = {
     orientation: Orientation.LANDSCAPE,
     scaleMode: ScaleMode.FILL,
     renderer: {
-        background: 0x000000,
+        background: {type: "color", value: 0x333333},
         antialias: false,  // Вимкнено для кращої продуктивності
         maxResolution: 1,
         autoDensity: true,
@@ -239,7 +243,7 @@ export const FULLSCREEN_CONFIG: IGameConfig = {
     container: {
         width: "100vw",
         height: "100vh",
-        cssBackground: "#000000",
+        cssBackground: {type: "color", value: "#ffffff"},
         borderRadius: "0px",
         position: "fixed",
         fullscreen: true

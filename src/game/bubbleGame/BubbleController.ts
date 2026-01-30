@@ -15,12 +15,16 @@ import { LeftTableController, LeftTableModel, LeftTableView } from "./leftTable"
 import { SCORE_UPDATED, MOVES_UPDATED, GAME_WIN, GAME_OVER, SHOW_FINISH_SCREEN, EXIT_GAME } from "src/events/TypesDispatch";
 import { AnimationHelper, FillAnimationItem } from "./animation";
 import { Texture } from "pixi.js";
+import { Resolve } from "src/core/di/decorators";
+import { GameStore } from "src/store/GameStore";
 
 interface TileSwipeExtra {
     tile: BubbleTile;
 }
 
 export class BubbleController extends Controller<BubbleModel, BubbleView> {
+
+    @Resolve("GameStore") private gameStore: GameStore;
 
     private availableColors = [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE];
     private swipeSystem: SwipeSystem<BubbleTile, TileSwipeExtra>;
@@ -31,10 +35,10 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     private isAnimating: boolean = false;
 
     init(): void {
+        this.setupEventListeners();
         this.setupSwipeSystem();
         this.setupClickSystem();
         this.setupLeftTable();
-        this.setupEventListeners();
         this.initGrid();
     }
 
@@ -52,13 +56,11 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
         const leftTableView = new LeftTableView();
         this.leftTableController = new LeftTableController(leftTableModel, leftTableView);
         this.leftTableController.init();
-
-        // View handles its own positioning (left side, centered vertically)
+        
         this.view.addChild(leftTableView);
 
-        // Set initial data from level config
         if (this.model.levelConfig) {
-            this.leftTableController.setInitialData(this.model.levelConfig.maxMoves);
+            this.leftTableController.setInitialData(this.model.levelConfig.obstacles.maxMoves, this.model.levelConfig.obstacles.collectScores);
         }
     }
 
@@ -69,7 +71,7 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     private dispatchMovesUpdate(): void {
         GlobalDispatcher.dispatch(MOVES_UPDATED, {
             movesLeft: this.model.movesLeft,
-            maxMoves: this.model.maxMoves
+            maxMoves: this.model.levelConfig.obstacles.maxMoves
         });
     }
 
@@ -134,7 +136,6 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
 
                     tile.setTexture(this.getTileTexture(row % 2));
                     tile.setItem(item);
-                    this.model.incrementSpawnedItems();
 
                     itemsToAnimate.push({ item, tile, row, col });
                 }
@@ -144,7 +145,6 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
         await AnimationHelper.animateGridFill(itemsToAnimate, grid.cols, gap);
 
         this.isAnimating = false;
-        console.log(`Grid filled with ${itemsToAnimate.length} items`);
     }
 
     private setupSwipeSystem(): void {
@@ -180,39 +180,30 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
             return;
         }
 
-        // Use a move for collecting
         this.model.useMove();
 
-        // Bonus: if collecting more than 10 items, add 1 move back
         const collectedCount = matchResult!.count;
-        if (collectedCount > 10) {
-            this.model.addMove();
-            console.log(`Bonus! Collected ${collectedCount} items (>10), +1 move!`);
+        if (collectedCount > 25) {
+            this.model.addMove(2);
+            console.log(`Bonus! Collected ${collectedCount} items (>25), +2 move!`);
         }
 
         this.dispatchMovesUpdate();
-        console.log(`Moves left: ${this.model.movesLeft}/${this.model.maxMoves}`);
 
         const scoreResult = ScoreCalculator.calculate(collectedCount, this.model.multiplier);
         this.model.addScore(scoreResult.totalScore);
         this.dispatchScoreUpdate();
 
-        console.log(`Collected ${collectedCount} ${TileColor[matchResult!.color]} items! Score: +${scoreResult.totalScore} (Total: ${this.model.score})`);
-
-        // Cancel any active swipe to prevent accidental moves after collection
         this.swipeSystem.cancel();
 
-        // Remove collected items with animation
         this.collectAndRefill(matchResult!.tiles);
     }
 
     private async collectAndRefill(tiles: BubbleTile[]): Promise<void> {
         this.isAnimating = true;
 
-        // Animate collected items disappearing
         await AnimationHelper.animateCollect(tiles);
 
-        // Remove items after animation
         for (const tile of tiles) {
             const item = tile.removeItem();
             if (item) {
@@ -220,27 +211,24 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
             }
         }
 
-        // Apply gravity and refill
         await this.applyGravityAndRefill();
 
         this.isAnimating = false;
 
-        // Check win condition (grid is empty - perfect clear!)
         if (this.isGridEmpty()) {
             this.handleWin();
             return;
         }
 
-        // Check if no valid matches remain (no possible moves, even with swaps)
         if (!MatchFinder.hasPossibleMoves(this.model.getGrid(), this.MIN_MATCH_COUNT)) {
-            // Not a loss - finish with penalty for remaining items
             await this.handleNoMatchesLeft();
             return;
         }
 
-        // Check game over (no moves left)
-        if (!this.model.hasMovesLeft()) {
+        if (!this.model.hasMovesLeft() && this.gameStore.checkIsLoseObstacle()) {
             this.handleGameOver();
+        } else if(!this.model.hasMovesLeft() && !this.gameStore.checkIsLoseObstacle()){
+            this.handleWin();
         }
     }
 
@@ -258,6 +246,8 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     }
 
     private handleWin(): void {
+        if(this.model.gameCurrentState === GameState.LEVEL_COMPLETE) return;
+
         console.log("=== YOU WIN! (Perfect Clear) ===");
         console.log(`Final Score: ${this.model.score}`);
         console.log(`Moves Used: ${this.model.maxMoves - this.model.movesLeft}/${this.model.maxMoves}`);
@@ -273,6 +263,10 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     }
 
     private async handleNoMatchesLeft(): Promise<void> {
+        if(this.model.gameCurrentState === GameState.LEVEL_COMPLETE) return;
+        if(this.isAnimating) return;
+
+        this.isAnimating = true;
         const remainingItems = this.countRemainingItems();
         const penalty = remainingItems * 10;
         const finalScore = Math.max(0, this.model.score - penalty);
@@ -424,11 +418,15 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     }
 
     private async handleGameOver(): Promise<void> {
+        if(this.model.gameCurrentState === GameState.GAME_OVER) return;
+        if(this.isAnimating) return;
+
         console.log("=== GAME OVER ===");
         console.log(`Final Score: ${this.model.score}`);
         console.log(`Items Spawned: ${this.model.spawnedItems}/${this.model.maxItems}`);
 
         this.model.setGameState(GameState.GAME_OVER);
+        this.isAnimating = true;
 
         // Clear the grid with animation
         await AnimationHelper.animateClearGrid(this.model.getGrid());
@@ -542,9 +540,11 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
     destroy(): void {
         this.swipeSystem.destroy();
         this.clickSystem.destroy();
-        if (this.leftTableController) {
-            this.leftTableController.destroy();
-        }
+        this.leftTableController?.destroy();
+        this.view.destroy();
+        this.model.destroy();
+        AnimationHelper.destroy();
+        
         GlobalDispatcher.removeAllForContext(this);
     }
 }

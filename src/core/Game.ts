@@ -83,7 +83,7 @@ export default class Game {
             width: Math.min(this.gameSize.width, LOGIC_WIDTH),
             height: Math.min(this.gameSize.height, LOGIC_HEIGHT),
             autoDensity: gameConfig.renderer.autoDensity,
-            background: gameConfig.renderer.background,
+            backgroundColor: gameConfig.renderer?.background.type === "color" ? Number(gameConfig.renderer.background.value) : undefined,
             antialias: gameConfig.renderer.antialias,
             autoStart: gameConfig.renderer.autoStart,
         });
@@ -109,6 +109,7 @@ export default class Game {
      */
     private applyContainerStyles(container: HTMLElement): void {
         const cfg = gameConfig.container;
+        const bg = gameConfig.renderer.background;
 
         // Apply width and height if specified in config
         if (cfg.width) {
@@ -118,10 +119,23 @@ export default class Game {
             container.style.height = cfg.height;
         }
 
-        // Apply other CSS properties
-        container.style.background = cfg.cssBackground;
-        container.style.borderRadius = cfg.borderRadius;
-        container.style.position = cfg.position;
+        if (bg?.type === "image") {
+            container.style.backgroundImage = `url(${bg.src})`;
+            container.style.backgroundSize = "cover";
+            container.style.backgroundPosition = "center";
+            container.style.backgroundRepeat = "no-repeat";
+        } else if (bg?.type === "color") {
+            container.style.background = String(bg.value);
+        } else {
+            if (cfg.cssBackground?.type === "image") {
+                container.style.backgroundImage = `url(${cfg.cssBackground.src})`;
+                container.style.backgroundSize = "cover";
+                container.style.backgroundPosition = "center";
+                container.style.backgroundRepeat = "no-repeat";
+            } else if (cfg.cssBackground?.type === "color") {
+                container.style.backgroundImage = String(cfg.cssBackground.value);
+            }
+        }
 
         // Fullscreen mode
         if (cfg.fullscreen) {

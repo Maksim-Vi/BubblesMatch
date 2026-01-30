@@ -1,4 +1,4 @@
-import { Container, NineSliceSprite, Texture } from "pixi.js";
+import { Container, NineSliceSprite, Sprite, Texture } from "pixi.js";
 import { UIText, IUITextOptions } from "./UIText";
 import { ClickSystem } from "../input/ClickSystem";
 import gsap from "gsap";
@@ -32,7 +32,7 @@ const DEFAULT_NINE_SLICE = {
 
 export class UIButton extends Container {
     private _content: Container;
-    private _background: NineSliceSprite;
+    private _background: NineSliceSprite | Sprite;
     private _label?: UIText;
     private _clickSystem: ClickSystem<UIButton>;
     private _onClick?: () => void;
@@ -57,15 +57,21 @@ export class UIButton extends Container {
         this._content = new Container();
         this.addChild(this._content);
 
-        const slice = options.nineSlice ?? DEFAULT_NINE_SLICE;
+        if(options.nineSlice){
+            const slice = options.nineSlice ?? DEFAULT_NINE_SLICE;
 
-        this._background = new NineSliceSprite({
-            texture: options.texture,
-            leftWidth: slice.left,
-            topHeight: slice.top,
-            rightWidth: slice.right,
-            bottomHeight: slice.bottom,
-        });
+            this._background = new NineSliceSprite({
+                texture: options.texture,
+                leftWidth: slice.left,
+                topHeight: slice.top,
+                rightWidth: slice.right,
+                bottomHeight: slice.bottom,
+            });
+        } else {
+            this._background = new Sprite(options.texture);
+            
+        }
+      
         this._background.width = options.width;
         this._background.height = options.height;
         this._content.addChild(this._background);

@@ -38,5 +38,6 @@ export default class LevelsWindowController extends Controller<LevelsWindowModel
         GlobalDispatcher.remove(SELECT_LEVEL, this.onLevelSelect);
         GlobalDispatcher.remove(PLAY_CURRENT_LEVEL, this.onPlayCurrentLevel);
         this.view.destroyView();
+        this.model.destroy();
     }
 }

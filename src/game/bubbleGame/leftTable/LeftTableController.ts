@@ -20,23 +20,23 @@ export class LeftTableController extends Controller<LeftTableModel, LeftTableVie
         GlobalDispatcher.add(MOVES_UPDATED, this.onMovesUpdated, this);
     }
 
-    setInitialData(maxMoves: number): void {
-        this.model.setInitialData(maxMoves);
-        this.view.updateScore(0);
+    setInitialData(maxMoves: number, needScores: number): void {
+        this.model.setInitialData(maxMoves, needScores);
+        this.view.updateScore(0, needScores);
         this.view.updateMoves(maxMoves, maxMoves);
     }
 
     private onScoreUpdated = (event: IGDEvent<IScoreUpdateData>): void => {
         if (event.params) {
             this.model.score = event.params.score;
-            this.view.updateScore(event.params.score);
+            this.view.updateScore(event.params.score, this.model.needScores );
         }
     };
 
     private onMovesUpdated = (event: IGDEvent<IMovesUpdateData>): void => {
         if (event.params) {
             this.model.movesLeft = event.params.movesLeft;
-            this.view.updateMoves(event.params.movesLeft, event.params.maxMoves);
+            this.view.updateMoves(event.params.movesLeft, this.model.maxMoves);
         }
     };
 
@@ -44,5 +44,6 @@ export class LeftTableController extends Controller<LeftTableModel, LeftTableVie
         GlobalDispatcher.remove(SCORE_UPDATED, this.onScoreUpdated);
         GlobalDispatcher.remove(MOVES_UPDATED, this.onMovesUpdated);
         this.view.destroyView();
+        this.model.destroy();
     }
 }

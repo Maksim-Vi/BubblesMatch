@@ -1,6 +1,18 @@
 import { TileColor } from "src/common/cell/Tile";
 import { Model } from "src/core/mvc/Model";
 
+
+export interface IObstacleColor { 
+    color: TileColor; 
+    count: number; 
+}
+
+export interface IObstacleConfig {
+    collectScores: number,
+    maxMoves: number; 
+    collectColors: IObstacleColor[] | null; 
+}
+
 export interface IGridConfig {
     gridWidth: number;
     gridHeight: number;
@@ -11,10 +23,9 @@ export interface IGridConfig {
 export interface ILevelConfig {
     id: number;
     gridConfig: IGridConfig;
-    maxItems: number; // Максимальна кількість елементів, які можуть бути заспавнені
-    maxMoves: number; // Максимальна кількість ходів
-    colors: TileColor[]; // Доступні кольори для цього рівня
-    description: string; // Додамо опис для рівня
+    maxItems: number; 
+    colors: TileColor[]; 
+    obstacles: IObstacleConfig; 
 }
 
 export class LevelStore extends Model {
@@ -32,9 +43,9 @@ export class LevelStore extends Model {
 
     private initializeLevels(): void {
         const baseGridConfig: IGridConfig = {
-            gridWidth: 8, // Почнемо з меншої сітки для перших рівнів
+            gridWidth: 8,
             gridHeight: 8,
-            cellSize: 80, // Трохи менші клітинки, щоб поміститися на екрані
+            cellSize: 100, 
             gap: 2
         };
 
@@ -42,82 +53,112 @@ export class LevelStore extends Model {
             {
                 id: 1,
                 gridConfig: { ...baseGridConfig, gridWidth: 8, gridHeight: 8 },
-                maxItems: 64, // 8x8 сітка
-                maxMoves: 25,
+                maxItems: 64,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE],
-                description: "Ласкаво просимо! Навчіться збирати кульки. Спробуйте очистити якомога більше!"
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 5,
+                    collectColors: null
+                }
             },
             {
                 id: 2,
                 gridConfig: { ...baseGridConfig, gridWidth: 8, gridHeight: 8 },
                 maxItems: 64,
-                maxMoves: 22,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE],
-                description: "З'явився новий колір! Будьте уважнішими."
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 22,
+                    collectColors: null
+                }
             },
             {
                 id: 3,
-                gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9 }, // Збільшуємо сітку
-                maxItems: 81, // 9x9 сітка
-                maxMoves: 20,
+                gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9 }, 
+                maxItems: 81,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE],
-                description: "Поле стало більшим! Більше місця для стратегії."
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 20,
+                    collectColors: null
+                }
             },
             {
                 id: 4,
                 gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9 },
                 maxItems: 81,
-                maxMoves: 18,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
-                description: "Ще один колір! Подумайте, перш ніж робити хід."
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 18,
+                    collectColors: null
+                }
             },
             {
                 id: 5,
                 gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9 },
                 maxItems: 81,
-                maxMoves: 15,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
-                description: "Ходів стає менше! Кожен хід на вагу золота."
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 15,
+                    collectColors: null
+                }
             },
             {
                 id: 6,
-                gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 75 }, // Ще більша сітка
-                maxItems: 100, // 10x10 сітка
-                maxMoves: 16, // Дамо трохи більше ходів через розмір
+                gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 80 },
+                maxItems: 100, 
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
-                description: "Гігантське поле! Це справжнє випробування."
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 16,
+                    collectColors: null
+                }
             },
             {
                 id: 7,
-                gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 75 },
+                gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 70 },
                 maxItems: 100,
-                maxMoves: 14,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE],
-                description: "На горизонті помаранчевий! Спробуйте утриматися від випадкових ходів."
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 14,
+                    collectColors: null
+                }
             },
             {
                 id: 8,
-                gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 75 },
+                gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 70 },
                 maxItems: 100,
-                maxMoves: 12,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE],
-                description: "Ви на межі! Кожен хід має бути продуманим."
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 12,
+                    collectColors: null
+                }
             },
             {
                 id: 9,
-                gridConfig: { ...baseGridConfig, gridWidth: 11, gridHeight: 11, cellSize: 70 }, // Ще більша, або зміна форми
-                maxItems: 121, // 11x11 сітка
-                maxMoves: 13, // Трохи більше ходів через складність
+                gridConfig: { ...baseGridConfig, gridWidth: 11, gridHeight: 11, cellSize: 70 }, 
+                maxItems: 121,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE, TileColor.MULTI],
-                description: "Справжній виклик для майстрів! Максимальна кількість кольорів."
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 13,
+                    collectColors: null
+                }
             },
             {
                 id: 10,
                 gridConfig: { ...baseGridConfig, gridWidth: 11, gridHeight: 11, cellSize: 70 },
                 maxItems: 121,
-                maxMoves: 10, // Дуже складно
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE, TileColor.MULTI],
-                description: "Великий фінал! Тільки найрозумніші зможуть це пройти!"
+                obstacles: {
+                    collectScores: 1000,
+                    maxMoves: 10,
+                    collectColors: null
+                }
             }
         ];
     }
@@ -155,8 +196,9 @@ export class LevelStore extends Model {
     private cloneLevel(level: ILevelConfig): ILevelConfig {
         return {
             ...level,
-            gridConfig: { ...level.gridConfig }, // Глибоке копіювання gridConfig
+            gridConfig: { ...level.gridConfig },
             colors: [...level.colors],
+            obstacles: { ...level.obstacles },
         };
     }
 

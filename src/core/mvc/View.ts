@@ -34,5 +34,8 @@ export abstract class View<M extends Model> extends Container {
      * Destroys the view and cleans up resources
      * Override this to clean up your visual elements
      */
-    abstract destroyView(): void;
+    public destroyView(): void
+    {
+        this.destroy();
+    };
 }

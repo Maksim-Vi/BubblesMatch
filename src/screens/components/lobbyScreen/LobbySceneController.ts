@@ -31,5 +31,6 @@ export default class LobbySceneController extends Controller<LobbySceneModel, Lo
     destroy(): void {
         GlobalDispatcher.remove(START_GAME, this.startGame);
         this.view.destroyView();
+        this.model.destroy();
     }
 }

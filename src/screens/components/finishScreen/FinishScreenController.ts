@@ -42,5 +42,6 @@ export class FinishScreenController extends Controller<FinishScreenModel, Finish
 
     destroy(): void {
         this.view.destroyView();
+        this.model.destroy();
     }
 }

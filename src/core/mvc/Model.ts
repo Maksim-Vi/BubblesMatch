@@ -13,5 +13,7 @@ export abstract class Model {
      * Clean up the model
      * Override this method to clean up resources
      */
-    destroy?(): void;
+    destroy?(): void {
+        
+    };
 }
