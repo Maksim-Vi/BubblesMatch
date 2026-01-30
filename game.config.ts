@@ -49,7 +49,7 @@ export const gameConfig: IGameConfig = {
     },
     debug: {
         showFPS: false,
-        showCoordinatePoints: false,
+        showCoordinatePoints: true,
         verbose: false
     }
 };

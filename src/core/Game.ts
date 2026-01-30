@@ -185,7 +185,7 @@ export default class Game {
                 // Stretch to fill (changes aspect ratio)
                 this.app.stage.scale.set(width / LOGIC_WIDTH, height / LOGIC_HEIGHT);
                 this.app.stage.position.set(0, 0);
-                ScreenHelper.updateTransform(width / LOGIC_WIDTH, 0, 0);
+                ScreenHelper.updateTransform(width / LOGIC_WIDTH, 0, 0, width, height, gameConfig.scaleMode);
                 GlobalDispatcher.dispatch("RESIZE_APP");
                 return;
             default:
@@ -199,8 +199,8 @@ export default class Game {
         const offsetY = (height - LOGIC_HEIGHT * scale) / 2;
         this.app.stage.position.set(offsetX, offsetY);
 
-        // Update ScreenHelper with current scale and offset
-        ScreenHelper.updateTransform(scale, offsetX, offsetY);
+        // Update ScreenHelper with current scale, offset, screen size and scale mode
+        ScreenHelper.updateTransform(scale, offsetX, offsetY, width, height, gameConfig.scaleMode);
 
         if (gameConfig.debug.verbose) {
             console.log("[Game] Resize:", {

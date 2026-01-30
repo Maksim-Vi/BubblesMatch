@@ -1,4 +1,5 @@
 import { Application, Graphics } from "pixi.js";
+import { ScaleMode } from "./GameConfigInterface";
 
 export interface IPoint {
     x: number;
@@ -12,6 +13,9 @@ export class ScreenHelper {
     private static scale: number = 1;
     private static offsetX: number = 0;
     private static offsetY: number = 0;
+    private static screenWidth: number = 0;
+    private static screenHeight: number = 0;
+    private static scaleMode: ScaleMode = ScaleMode.FIT;
 
     public static init(app: Application, width: number, height: number): void {
         this.app = app;
@@ -24,11 +28,24 @@ export class ScreenHelper {
      * @param scale Current scale factor
      * @param offsetX Horizontal offset
      * @param offsetY Vertical offset
+     * @param screenWidth Actual screen/container width
+     * @param screenHeight Actual screen/container height
+     * @param scaleMode Current scale mode
      */
-    public static updateTransform(scale: number, offsetX: number, offsetY: number): void {
+    public static updateTransform(
+        scale: number,
+        offsetX: number,
+        offsetY: number,
+        screenWidth?: number,
+        screenHeight?: number,
+        scaleMode?: ScaleMode
+    ): void {
         this.scale = scale;
         this.offsetX = offsetX;
         this.offsetY = offsetY;
+        if (screenWidth !== undefined) this.screenWidth = screenWidth;
+        if (screenHeight !== undefined) this.screenHeight = screenHeight;
+        if (scaleMode !== undefined) this.scaleMode = scaleMode;
     }
 
     public static get Width(): number {
@@ -39,38 +56,82 @@ export class ScreenHelper {
         return this.height;
     }
     /**
-     * Top-left corner in logical coordinates (always 0, 0)
+     * Gets the visible viewport bounds in logical coordinates
+     * In FILL mode, this represents the actual visible area (smaller than logic size)
+     * In FIT mode, this equals the full logic size
+     */
+    private static get viewportBounds(): { left: number; right: number; top: number; bottom: number } {
+        if (this.scaleMode === ScaleMode.FILL && this.scale > 0) {
+            return {
+                left: -this.offsetX / this.scale,
+                right: (this.screenWidth - this.offsetX) / this.scale,
+                top: -this.offsetY / this.scale,
+                bottom: (this.screenHeight - this.offsetY) / this.scale
+            };
+        }
+        return {
+            left: 0,
+            right: this.width,
+            top: 0,
+            bottom: this.height
+        };
+    }
+
+    /**
+     * Top-left corner in logical coordinates
+     * In FILL mode: returns visible viewport corner
      */
     public static get TopLeft(): IPoint {
-        return { x: 0, y: 0 };
+        const bounds = this.viewportBounds;
+        return { x: bounds.left, y: bounds.top };
     }
 
     /**
      * Top-right corner in logical coordinates
+     * In FILL mode: returns visible viewport corner
      */
     public static get TopRight(): IPoint {
-        return { x: this.width, y: 0 };
+        const bounds = this.viewportBounds;
+        return { x: bounds.right, y: bounds.top };
     }
 
     /**
      * Bottom-left corner in logical coordinates
+     * In FILL mode: returns visible viewport corner
      */
     public static get BottomLeft(): IPoint {
-        return { x: 0, y: this.height };
+        const bounds = this.viewportBounds;
+        return { x: bounds.left, y: bounds.bottom };
     }
 
     /**
      * Bottom-right corner in logical coordinates
+     * In FILL mode: returns visible viewport corner
      */
     public static get BottomRight(): IPoint {
-        return { x: this.width, y: this.height };
+        const bounds = this.viewportBounds;
+        return { x: bounds.right, y: bounds.bottom };
     }
 
     /**
-     * Center point in logical coordinates
+     * Center point in logical coordinates (always center of logic size)
      */
     public static get Center(): IPoint {
         return { x: this.width / 2, y: this.height / 2 };
+    }
+
+    /**
+     * Full logic width (unchanged by scale mode)
+     */
+    public static get LogicWidth(): number {
+        return this.width;
+    }
+
+    /**
+     * Full logic height (unchanged by scale mode)
+     */
+    public static get LogicHeight(): number {
+        return this.height;
     }
 
     /**
