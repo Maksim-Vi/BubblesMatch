@@ -17,3 +17,6 @@ yarn-debug.log*
 yarn-error.log*
 /vscode/**
 /vscode
+
+/ai_doc
+ai_doc
