@@ -1,6 +1,7 @@
 import { Assets, Texture } from "pixi.js";
 import GlobalDispatcher from "../events/GlobalDispatcher";
 import * as PIXI from "pixi.js";
+import { ASSETS_LOAD_START, ASSETS_LOAD_PROGRESS, ASSETS_LOAD_COMPLETE } from "../events/TypesDispatch";
 
 export default new class AssetsLoader {
 
@@ -30,7 +31,7 @@ export default new class AssetsLoader {
         }
 
         this.isLoading = true;
-        GlobalDispatcher.dispatch("ASSETS_LOAD_START", { assets: toLoad });
+        GlobalDispatcher.dispatch(ASSETS_LOAD_START, { assets: toLoad });
 
         const basePath = "assets/";
         let loadedCount = 0;
@@ -50,13 +51,13 @@ export default new class AssetsLoader {
 
             loadedCount++;
             const progress = Math.floor((loadedCount / toLoad.length) * 100);
-            GlobalDispatcher.dispatch("ASSETS_LOAD_PROGRESS", {
+            GlobalDispatcher.dispatch(ASSETS_LOAD_PROGRESS, {
                 key,
                 progress,
             });
         }
 
-        GlobalDispatcher.dispatch("ASSETS_LOAD_COMPLETE", { assets: result });
+        GlobalDispatcher.dispatch(ASSETS_LOAD_COMPLETE, { assets: result });
         this.isLoading = false;
         return result;
     }
@@ -84,12 +85,12 @@ export default new class AssetsLoader {
 
         this.isLoading = false;
 
-        GlobalDispatcher.dispatch("ASSETS_LOAD_PROGRESS", {
+        GlobalDispatcher.dispatch(ASSETS_LOAD_PROGRESS, {
             key,
             progress: 100,
         });
 
-        GlobalDispatcher.dispatch("ASSETS_LOAD_COMPLETE", { assets: { [key]: texture } });
+        GlobalDispatcher.dispatch(ASSETS_LOAD_COMPLETE, { assets: { [key]: texture } });
 
         return texture;
     }
