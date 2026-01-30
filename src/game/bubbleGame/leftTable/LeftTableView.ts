@@ -13,9 +13,9 @@ export class LeftTableView extends View<LeftTableModel> {
     private _movesText!: Text;
     private _container!: Container;
 
-    private readonly PANEL_WIDTH = 300;
+    private readonly PANEL_WIDTH = 350;
     private readonly PANEL_HEIGHT = 800;
-    private readonly MARGIN_LEFT = 50;
+    private readonly MARGIN_LEFT = 30;
 
     constructor() {
         super();
@@ -101,7 +101,7 @@ export class LeftTableView extends View<LeftTableModel> {
             style
         });
         this._movesText.anchor.set(0.5, 0);
-        this._movesText.position.set(this.PANEL_WIDTH / 2, 100);
+        this._movesText.position.set(this.PANEL_WIDTH / 2, this.PANEL_HEIGHT - 120);
         this._container.addChild(this._movesText);
     }
 

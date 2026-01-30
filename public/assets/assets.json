@@ -66,6 +66,14 @@
       "type": "image"
     },
     {
+      "load": "assets/levels_bg",
+      "assetName": "levels_bg",
+      "assetPath": "assets/",
+      "fullAssetPath": "/Users/max_home/Projects/PixiProjects/BubbleMatch/public/assets/assets/",
+      "ext": "png",
+      "type": "image"
+    },
+    {
       "load": "assets/star",
       "assetName": "star",
       "assetPath": "assets/",
@@ -148,6 +156,30 @@
     {
       "load": "ico/5",
       "assetName": "5",
+      "assetPath": "ico/",
+      "fullAssetPath": "/Users/max_home/Projects/PixiProjects/BubbleMatch/public/assets/ico/",
+      "ext": "png",
+      "type": "image"
+    },
+    {
+      "load": "ico/6",
+      "assetName": "6",
+      "assetPath": "ico/",
+      "fullAssetPath": "/Users/max_home/Projects/PixiProjects/BubbleMatch/public/assets/ico/",
+      "ext": "png",
+      "type": "image"
+    },
+    {
+      "load": "ico/7",
+      "assetName": "7",
+      "assetPath": "ico/",
+      "fullAssetPath": "/Users/max_home/Projects/PixiProjects/BubbleMatch/public/assets/ico/",
+      "ext": "png",
+      "type": "image"
+    },
+    {
+      "load": "ico/8",
+      "assetName": "8",
       "assetPath": "ico/",
       "fullAssetPath": "/Users/max_home/Projects/PixiProjects/BubbleMatch/public/assets/ico/",
       "ext": "png",

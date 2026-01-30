@@ -20,3 +20,7 @@ export const ASSETS_LOAD_COMPLETE: string = 'assets:loadComplete';
 // App events
 export const RESIZE_APP: string = 'app:resize';
 export const START_GAME: string = 'game:start';
+
+// Level selection events
+export const SELECT_LEVEL: string = 'level:select';
+export const PLAY_CURRENT_LEVEL: string = 'level:playCurrent';
