@@ -23,9 +23,19 @@ export default class LoadingSceneView extends View<LoadingSceneModel> {
 
     private createFallbackBackground() {
         this._fallbackBg = new PIXI.Graphics();
-        this._fallbackBg.rect(0, 0, ScreenHelper.Width * 2, ScreenHelper.Height * 2);
-        this._fallbackBg.fill(0x1a1a2e);
         this.addChild(this._fallbackBg);
+        this.updateFallbackBg();
+    }
+
+    private updateFallbackBg() {
+        this._fallbackBg.clear();
+        this._fallbackBg.rect(
+            ScreenHelper.TopLeft.x,
+            ScreenHelper.TopLeft.y,
+            ScreenHelper.ViewportWidth,
+            ScreenHelper.ViewportHeight
+        );
+        this._fallbackBg.fill(0x1a1a2e);
     }
 
     private createBackground() {
@@ -50,7 +60,7 @@ export default class LoadingSceneView extends View<LoadingSceneModel> {
             }
         });
         this._text.anchor.set(0.5);
-        this._text.position.set(ScreenHelper.Center.x, ScreenHelper.Center.y);
+        this._text.position.set(ScreenHelper.ViewportCenter.x, ScreenHelper.ViewportCenter.y);
 
         this.addChild(this._text);
     }
@@ -66,11 +76,8 @@ export default class LoadingSceneView extends View<LoadingSceneModel> {
     }
 
     private updateLayout() {
-        this._fallbackBg.clear();
-        this._fallbackBg.rect(0, 0, ScreenHelper.Width * 2, ScreenHelper.Height * 2);
-        this._fallbackBg.fill(0x1a1a2e);
-
-        this._text.position.set(ScreenHelper.Center.x, ScreenHelper.Center.y);
+        this.updateFallbackBg();
+        this._text.position.set(ScreenHelper.ViewportCenter.x, ScreenHelper.ViewportCenter.y);
     }
 
     private resize = () => {

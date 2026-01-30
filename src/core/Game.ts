@@ -10,7 +10,7 @@ import {DI} from "./di/DI";
 import GlobalDispatcher from "../events/GlobalDispatcher";
 import {ScreenHelper} from "./ScreenHelper";
 import {gameConfig} from "../../game.config";
-import { ScaleMode } from "./GameConfigInterface";
+import { ScaleMode, FillMode } from "./GameConfigInterface";
 
 export interface IGameSize {
     width: number;
@@ -175,11 +175,35 @@ export default class Game {
         switch (gameConfig.scaleMode) {
             case ScaleMode.FIT:
                 // Fit to screen maintaining aspect ratio (letterbox/pillarbox)
-                scale = Math.min(width / LOGIC_WIDTH, height / LOGIC_HEIGHT);
+                const fillM = gameConfig.fillMode ?? FillMode.AUTO;
+                switch (fillM) {
+                    case FillMode.WIDTH:
+                        scale = width / LOGIC_WIDTH;
+                        break;
+                    case FillMode.HEIGHT:
+                        scale = height / LOGIC_HEIGHT;
+                        break;
+                    case FillMode.AUTO:
+                    default:
+                        scale = Math.min(width / LOGIC_WIDTH, height / LOGIC_HEIGHT);
+                        break;
+                }
                 break;
             case ScaleMode.FILL:
                 // Fill screen (may crop content)
-                scale = Math.max(width / LOGIC_WIDTH, height / LOGIC_HEIGHT);
+                const fillMode = gameConfig.fillMode ?? FillMode.AUTO;
+                switch (fillMode) {
+                    case FillMode.WIDTH:
+                        scale = width / LOGIC_WIDTH;
+                        break;
+                    case FillMode.HEIGHT:
+                        scale = height / LOGIC_HEIGHT;
+                        break;
+                    case FillMode.AUTO:
+                    default:
+                        scale = Math.max(width / LOGIC_WIDTH, height / LOGIC_HEIGHT);
+                        break;
+                }
                 break;
             case ScaleMode.STRETCH:
                 // Stretch to fill (changes aspect ratio)

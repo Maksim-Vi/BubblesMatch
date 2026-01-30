@@ -1,4 +1,4 @@
-import { IGameConfig, Orientation, ScaleMode } from "src/core/GameConfigInterface";
+import { IGameConfig, Orientation, ScaleMode, FillMode } from "src/core/GameConfigInterface";
 
 
 
@@ -31,10 +31,11 @@ export const gameConfig: IGameConfig = {
     logicWidth: 1920,
     logicHeight: 1080,
     orientation: Orientation.LANDSCAPE,
-    scaleMode: ScaleMode.FIT,
+    scaleMode: ScaleMode.FILL,
+    fillMode: FillMode.AUTO, // WIDTH | HEIGHT | AUTO
     renderer: {
         background: {type: "color", value: "#ffffff"},
-        antialias: false,  // Вимкнено для кращої продуктивності
+        antialias: false,
         maxResolution: 1,
         autoDensity: true,
         autoStart: true
@@ -49,7 +50,7 @@ export const gameConfig: IGameConfig = {
     },
     debug: {
         showFPS: false,
-        showCoordinatePoints: true,
-        verbose: false
+        showCoordinatePoints: false,
+        verbose: true
     }
 };

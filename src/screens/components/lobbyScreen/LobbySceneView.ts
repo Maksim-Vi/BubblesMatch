@@ -67,7 +67,7 @@ export default class LobbySceneView extends View<LobbySceneModel> {
 
     private createLevelsWindow(): void {
         this._levelsWindow = new LevelsWindowView(this._levelsOptions);
-        this._levelsWindow.position.set(ScreenHelper.Center.x, ScreenHelper.Center.y + 50);
+        this._levelsWindow.position.set(ScreenHelper.ViewportCenter.x, ScreenHelper.ViewportCenter.y);
         this.addChild(this._levelsWindow);
     }
 
@@ -84,7 +84,7 @@ export default class LobbySceneView extends View<LobbySceneModel> {
     }
 
     private updateLayout = (): void => {
-        this._levelsWindow.position.set(ScreenHelper.Center.x, ScreenHelper.Center.y + 50);
+        this._levelsWindow.position.set(ScreenHelper.ViewportCenter.x, ScreenHelper.ViewportCenter.y);
     }
 
     updateLevels(options: ILevelsWindowOptions): void {

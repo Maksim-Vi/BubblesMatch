@@ -9,6 +9,15 @@ export enum ScaleMode {
     STRETCH = "stretch"
 }
 
+export enum FillMode {
+    /** Scale by width - fills width, may crop top/bottom */
+    WIDTH = "width",
+    /** Scale by height - fills height, may crop left/right */
+    HEIGHT = "height",
+    /** Auto - uses Math.max to fill entire screen (current behavior) */
+    AUTO = "auto"
+}
+
 export type RendererBackground =
     | { type: "color"; value: number | string }
     | { type: "image"; src: string };
@@ -34,6 +43,14 @@ export interface IGameConfig {
      * Режим масштабування
      */
     scaleMode: ScaleMode;
+
+    /**
+     * Режим заповнення при ScaleMode.FILL
+     * - WIDTH: масштабування по ширині (може обрізати верх/низ)
+     * - HEIGHT: масштабування по висоті (може обрізати ліво/право)
+     * - AUTO: автоматично (Math.max - заповнює весь екран)
+     */
+    fillMode?: FillMode;
 
     /**
      * Renderer settings
@@ -233,6 +250,7 @@ export const FULLSCREEN_CONFIG: IGameConfig = {
     logicHeight: 1080,
     orientation: Orientation.LANDSCAPE,
     scaleMode: ScaleMode.FILL,
+    fillMode: FillMode.AUTO,
     renderer: {
         background: {type: "color", value: 0x333333},
         antialias: false,  // Вимкнено для кращої продуктивності

@@ -165,9 +165,14 @@ export class FinishScreenView extends View<FinishScreenModel> {
 
     private updateLayout = (): void => {
         this._overlay.clear();
-        this._overlay.rect(0, 0, ScreenHelper.Width, ScreenHelper.Height);
+        this._overlay.rect(
+            ScreenHelper.TopLeft.x,
+            ScreenHelper.TopLeft.y,
+            ScreenHelper.ViewportWidth,
+            ScreenHelper.ViewportHeight
+        );
         this._overlay.fill({ color: 0x000000, alpha: 0.5 });
-        this._container.position.set(ScreenHelper.Center.x, ScreenHelper.Center.y);
+        this._container.position.set(ScreenHelper.ViewportCenter.x, ScreenHelper.ViewportCenter.y);
     };
 
     destroyView(): void {

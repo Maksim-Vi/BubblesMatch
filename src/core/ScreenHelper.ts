@@ -61,7 +61,8 @@ export class ScreenHelper {
      * In FIT mode, this equals the full logic size
      */
     private static get viewportBounds(): { left: number; right: number; top: number; bottom: number } {
-        if (this.scaleMode === ScaleMode.FILL && this.scale > 0) {
+        // Check if screen dimensions are ready
+        if (this.scaleMode === ScaleMode.FILL && this.scale > 0 && this.screenWidth > 0 && this.screenHeight > 0) {
             return {
                 left: -this.offsetX / this.scale,
                 right: (this.screenWidth - this.offsetX) / this.scale,
@@ -69,6 +70,7 @@ export class ScreenHelper {
                 bottom: (this.screenHeight - this.offsetY) / this.scale
             };
         }
+        // Fallback to logic dimensions
         return {
             left: 0,
             right: this.width,
@@ -132,6 +134,47 @@ export class ScreenHelper {
      */
     public static get LogicHeight(): number {
         return this.height;
+    }
+
+    /**
+     * Viewport width in logical coordinates (visible area width)
+     */
+    public static get ViewportWidth(): number {
+        const bounds = this.viewportBounds;
+        return bounds.right - bounds.left;
+    }
+
+    /**
+     * Viewport height in logical coordinates (visible area height)
+     */
+    public static get ViewportHeight(): number {
+        const bounds = this.viewportBounds;
+        return bounds.bottom - bounds.top;
+    }
+
+    /**
+     * Viewport center in logical coordinates (center of visible area)
+     */
+    public static get ViewportCenter(): IPoint {
+        const bounds = this.viewportBounds;
+        return {
+            x: (bounds.left + bounds.right) / 2,
+            y: (bounds.top + bounds.bottom) / 2
+        };
+    }
+
+    /**
+     * Full Screen width (unchanged by scale mode)
+     */
+    public static get ScreenWidth(): number {
+        return this.screenWidth;
+    }
+
+    /**
+     * Full Screen height (unchanged by scale mode)
+     */
+    public static get ScreenHeight(): number {
+        return this.screenHeight;
     }
 
     /**
