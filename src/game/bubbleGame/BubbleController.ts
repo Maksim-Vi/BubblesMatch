@@ -14,6 +14,7 @@ import { GravitySystem } from "src/game/bubbleGame/gravity";
 import { LeftTableController, LeftTableModel, LeftTableView } from "./leftTable";
 import { SCORE_UPDATED, MOVES_UPDATED, GAME_WIN, GAME_OVER, SHOW_FINISH_SCREEN, EXIT_GAME } from "src/events/TypesDispatch";
 import { AnimationHelper, FillAnimationItem } from "./animation";
+import { Texture } from "pixi.js";
 
 interface TileSwipeExtra {
     tile: BubbleTile;
@@ -124,7 +125,6 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
         const gap = this.model.levelConfig.gridConfig.gap;
         const itemsToAnimate: FillAnimationItem[] = [];
 
-        // Create items for all cells, column by column (right to left)
         for (let col = grid.cols - 1; col >= 0; col--) {
             for (let row = 0; row < grid.rows; row++) {
                 const tile = grid.getTile(row, col);
@@ -132,6 +132,7 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
                     const randomColor = this.getRandomColor(this.availableColors);
                     const item = this.createItem(randomColor);
 
+                    tile.setTexture(this.getTileTexture(row % 2));
                     tile.setItem(item);
                     this.model.incrementSpawnedItems();
 
@@ -140,7 +141,6 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
             }
         }
 
-        // Animate items falling column by column
         await AnimationHelper.animateGridFill(itemsToAnimate, grid.cols, gap);
 
         this.isAnimating = false;
@@ -500,6 +500,11 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
         const textureKey = this.model.getTextureKeyForColor(color);
         const texture = AssetsLoader.get(textureKey);
         return new Item(color, texture);
+    }
+
+    private getTileTexture(index: number): Texture {
+        const textureKey = this.model.getTextureGrid(index);
+        return AssetsLoader.get(textureKey);
     }
 
     destroy(): void {

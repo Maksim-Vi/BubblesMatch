@@ -19,14 +19,16 @@ export interface SwipeCallbacks<T, TExtra = {}> {
 
 export interface SwipeSystemConfig {
     threshold: number;
+    cursor: string;
 }
 
 const DEFAULT_CONFIG: SwipeSystemConfig = {
-    threshold: 30
+    threshold: 30,
+    cursor: 'pointer',
 };
 
 export class SwipeSystem<T extends Container = Container, TExtra = {}> {
-  
+
     private inputSystem: InputSystem<T>;
     private state: ISwipeState<TExtra> | null = null;
     private callbacks: SwipeCallbacks<T, TExtra>;
@@ -36,14 +38,19 @@ export class SwipeSystem<T extends Container = Container, TExtra = {}> {
     constructor(callbacks: SwipeCallbacks<T, TExtra>, config: Partial<SwipeSystemConfig> = {}) {
         this.callbacks = callbacks;
         this.config = { ...DEFAULT_CONFIG, ...config };
-        this.inputSystem = new InputSystem<T>();
+        this.inputSystem = new InputSystem<T>({
+            cursor: this.config.cursor,
+            useGlobalMove: true,
+        });
     }
 
     public attach(target: T): void {
         this.inputSystem.attach(target, {
-            onStart: (e, t) => this.handleStart(e, t),
-            onMove: (e, t) => this.handleMove(e, t),
-            onEnd: (_, t) => this.handleEnd(t)
+            onPointerDown: (e, t) => this.handleStart(e, t),
+            onPointerMove: (e, t) => this.handleMove(e, t),
+            onPointerUp: (_, t) => this.handleEnd(t),
+            onPointerUpOutside: (_, t) => this.handleEnd(t),
+            canInteract: (t) => !this.callbacks.canSwipe || this.callbacks.canSwipe(t),
         });
     }
 
@@ -52,10 +59,6 @@ export class SwipeSystem<T extends Container = Container, TExtra = {}> {
     }
 
     private handleStart(event: FederatedPointerEvent, target: T): void {
-        if (this.callbacks.canSwipe && !this.callbacks.canSwipe(target)) {
-            return;
-        }
-
         const extra = this.callbacks.getExtra?.(target) ?? {} as TExtra;
         this.state = createSwipeState(extra);
         this.state.active = true;
@@ -103,6 +106,11 @@ export class SwipeSystem<T extends Container = Container, TExtra = {}> {
 
     public cancel(): void {
         this.resetState();
+    }
+
+    public setCursor(cursor: string): void {
+        this.config.cursor = cursor;
+        this.inputSystem.setCursor(cursor);
     }
 
     public destroy(): void {

@@ -4,6 +4,7 @@ export enum TileColor{
     RED = 0,
     YELLOW = 1,
     PURPURE = 2,
+    BLUE = 3,
 }
 
 export enum BoostType {
@@ -48,11 +49,9 @@ export class Tile extends PIXI.Container {
 
     private createSprite(texture: PIXI.Texture): void {
         const sprite = new PIXI.Sprite(texture);
-        sprite.anchor.set(0.5);
-        // sprite.position.set(
-        //     this._data.sizeTile * 0.5,
-        //     this._data.sizeTile * 0.5
-        // );
+    
+        sprite.width = this._data.sizeTile;
+        sprite.height = this._data.sizeTile;
 
         this._content = sprite;
         this.addChild(sprite);

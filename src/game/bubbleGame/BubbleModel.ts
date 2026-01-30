@@ -115,9 +115,17 @@ export class BubbleModel extends Model {
             [TileColor.RED]: 'ico/1',
             [TileColor.YELLOW]: 'ico/2',
             [TileColor.PURPURE]: 'ico/3',
+            [TileColor.BLUE]: 'ico/4',
+
         };
 
         return colorMap[color] || 'ico/1';
+    }
+
+    public getTextureGrid(index: number): string {
+        const map = ['grid/gridCell_1', 'grid/gridCell_2']
+
+        return map[index] || 'grid/gridCell_1';
     }
 
     getGrid(): BubbleGrid {
