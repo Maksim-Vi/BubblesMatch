@@ -48,8 +48,6 @@ html, body {
     height: 100%;
     overflow: hidden;
     background: #000000;
-    /* iOS safe area for notch/rounded corners */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     box-sizing: border-box;
 }
 
@@ -63,8 +61,6 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
     width: 100%;
     height: 100%;
     background: #000000;
