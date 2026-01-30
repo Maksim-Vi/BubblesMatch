@@ -1,0 +1,25 @@
+{
+  "name": "Bubble Game",
+  "short_name": "BubbleGame",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape-primary",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "assets/ico/1.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/ico/1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
