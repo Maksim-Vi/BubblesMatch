@@ -56,7 +56,9 @@ export class LevelStore extends Model {
                 maxItems: 64,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE],
                 obstacles: {
-                    collectScores: 1000,
+                    //collectScores: 1000,
+                    //maxMoves: 25,
+                    collectScores: 100,
                     maxMoves: 5,
                     collectColors: null
                 }
@@ -78,7 +80,7 @@ export class LevelStore extends Model {
                 maxItems: 81,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE],
                 obstacles: {
-                    collectScores: 1000,
+                    collectScores: 1500,
                     maxMoves: 20,
                     collectColors: null
                 }
@@ -89,7 +91,7 @@ export class LevelStore extends Model {
                 maxItems: 81,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
                 obstacles: {
-                    collectScores: 1000,
+                    collectScores: 1600,
                     maxMoves: 18,
                     collectColors: null
                 }
@@ -100,7 +102,7 @@ export class LevelStore extends Model {
                 maxItems: 81,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
                 obstacles: {
-                    collectScores: 1000,
+                    collectScores: 1800,
                     maxMoves: 15,
                     collectColors: null
                 }
@@ -111,7 +113,7 @@ export class LevelStore extends Model {
                 maxItems: 100, 
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
                 obstacles: {
-                    collectScores: 1000,
+                    collectScores: 1800,
                     maxMoves: 16,
                     collectColors: null
                 }
@@ -122,7 +124,7 @@ export class LevelStore extends Model {
                 maxItems: 100,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE],
                 obstacles: {
-                    collectScores: 1000,
+                    collectScores: 2000,
                     maxMoves: 14,
                     collectColors: null
                 }
@@ -133,7 +135,7 @@ export class LevelStore extends Model {
                 maxItems: 100,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE],
                 obstacles: {
-                    collectScores: 1000,
+                    collectScores: 2000,
                     maxMoves: 12,
                     collectColors: null
                 }
@@ -144,7 +146,7 @@ export class LevelStore extends Model {
                 maxItems: 121,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE, TileColor.MULTI],
                 obstacles: {
-                    collectScores: 1000,
+                    collectScores: 2500,
                     maxMoves: 13,
                     collectColors: null
                 }
@@ -155,7 +157,7 @@ export class LevelStore extends Model {
                 maxItems: 121,
                 colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE, TileColor.MULTI],
                 obstacles: {
-                    collectScores: 1000,
+                    collectScores: 2000,
                     maxMoves: 10,
                     collectColors: null
                 }

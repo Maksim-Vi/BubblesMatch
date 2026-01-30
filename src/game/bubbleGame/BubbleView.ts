@@ -1,8 +1,8 @@
-import { Container, Graphics, Text, TextStyle } from "pixi.js";
+import { Container, Graphics } from "pixi.js";
 import { View } from "src/core/mvc/View";
 import { Grid } from "src/common/grid/Grid";
 import { BubbleModel } from "./BubbleModel";
-import { ScaledBackground } from "src/common/ui";
+import { ScaledBackground, UIText } from "src/common/ui";
 import AssetsLoader from "src/assetsLoader/AssetsLoader";
 import { ScreenHelper } from "src/core/ScreenHelper";
 import GlobalDispatcher from "src/events/GlobalDispatcher";
@@ -53,13 +53,12 @@ export class BubbleView extends View<BubbleModel> {
         this._exitButton.addChild(bg);
 
         // X symbol
-        const xText = new Text('✕', new TextStyle({
-            fontFamily: 'Arial',
+        const xText = new UIText({
+            text: '✕',
             fontSize: 28,
-            fontWeight: 'bold',
-            fill: 0xFFFFFF
-        }));
-        xText.anchor.set(0.5);
+            fill: 0xFFFFFF,
+            anchor: 0.5
+        });
         this._exitButton.addChild(xText);
 
         this._exitButton.position.set(

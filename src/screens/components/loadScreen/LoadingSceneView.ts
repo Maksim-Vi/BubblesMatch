@@ -1,16 +1,16 @@
 import { View } from "../../../core/mvc/View";
-import * as PIXI from "pixi.js";
+import { Graphics, Texture as PIXITexture } from "pixi.js";
 import GlobalDispatcher from "../../../events/GlobalDispatcher";
 import { ScreenHelper } from "src/core/ScreenHelper";
 import LoadingSceneModel from "./LoadingSceneModel";
-import { ScaledBackground } from "src/common/ui";
+import { ScaledBackground, UIText } from "src/common/ui";
 import { RESIZE_APP } from "src/events/TypesDispatch";
 
 export default class LoadingSceneView extends View<LoadingSceneModel> {
 
-    private _fallbackBg!: PIXI.Graphics;
+    private _fallbackBg!: Graphics;
     private _background!: ScaledBackground;
-    private _text!: PIXI.Text;
+    private _text!: UIText;
 
     create() {
         GlobalDispatcher.add(RESIZE_APP, this.resize, this);
@@ -22,7 +22,7 @@ export default class LoadingSceneView extends View<LoadingSceneModel> {
     }
 
     private createFallbackBackground() {
-        this._fallbackBg = new PIXI.Graphics();
+        this._fallbackBg = new Graphics();
         this.addChild(this._fallbackBg);
         this.updateFallbackBg();
     }
@@ -45,39 +45,31 @@ export default class LoadingSceneView extends View<LoadingSceneModel> {
     }
 
     private createText() {
-        this._text = new PIXI.Text({
+        this._text = new UIText({
             text: "Loading 0%",
-            style: {
-                fontFamily: "Arial",
-                fontSize: 50,
-                fill: 0xffffff,
-                align: "center",
-                dropShadow: {
-                    color: 0x000000,
-                    blur: 4,
-                    distance: 2
-                }
-            }
+            fontSize: 50,
+            fill: 0xffffff,
+            dropShadow: { color: 0x000000, blur: 4, distance: 2 },
+            anchor: 0.5,
+            position: { x: ScreenHelper.ViewportCenter.x, y: ScreenHelper.ViewportCenter.y }
         });
-        this._text.anchor.set(0.5);
-        this._text.position.set(ScreenHelper.ViewportCenter.x, ScreenHelper.ViewportCenter.y);
 
         this.addChild(this._text);
     }
 
-    public setBackground(texture: PIXI.Texture): void {
+    public setBackground(texture: PIXITexture): void {
         this._background.setTexture(texture);
         this._background.visible = true;
         this._fallbackBg.visible = false;
     }
 
     public update(progress: number) {
-        this._text.text = `Loading ${progress | 0}%`;
+        this._text.setText(`Loading ${progress | 0}%`);
     }
 
     private updateLayout() {
         this.updateFallbackBg();
-        this._text.position.set(ScreenHelper.ViewportCenter.x, ScreenHelper.ViewportCenter.y);
+        this._text.setPosition(ScreenHelper.ViewportCenter.x, ScreenHelper.ViewportCenter.y);
     }
 
     private resize = () => {
