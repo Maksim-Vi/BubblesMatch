@@ -139,7 +139,9 @@ export class UIText extends Text {
         this.position.set(x, y);
     }
 
-    centerAnchor(): void {
-        this.anchor.set(0.5);
+    setAnchor(x: number, y?: number) {
+        if(!y) return this.anchor.set(x);
+
+        this.anchor.set(x,y);
     }
 }

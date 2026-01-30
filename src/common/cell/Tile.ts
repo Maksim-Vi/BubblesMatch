@@ -5,6 +5,7 @@ export enum TileColor{
     YELLOW = 1,
     PURPURE = 2,
     BLUE = 3,
+    PING = 4,
 }
 
 export enum BoostType {

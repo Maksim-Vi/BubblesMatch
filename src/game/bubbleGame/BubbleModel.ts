@@ -116,7 +116,7 @@ export class BubbleModel extends Model {
             [TileColor.YELLOW]: 'ico/2',
             [TileColor.PURPURE]: 'ico/3',
             [TileColor.BLUE]: 'ico/4',
-
+            [TileColor.PING]: 'ico/5',
         };
 
         return colorMap[color] || 'ico/1';

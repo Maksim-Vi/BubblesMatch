@@ -19,9 +19,9 @@ export class FinishScreenView extends View<FinishScreenModel> {
     private _lobbyButton!: UIButton;
     private _buttonsContainer!: UIContainer;
 
-    private readonly PANEL_WIDTH = 800;
-    private readonly PANEL_HEIGHT = 500;
-    private readonly BUTTON_WIDTH = 200;
+    private readonly PANEL_WIDTH = 850;
+    private readonly PANEL_HEIGHT = 600;
+    private readonly BUTTON_WIDTH = 250;
     private readonly BUTTON_HEIGHT = 80;
     private readonly BUTTON_GAP = 40;
 
@@ -35,10 +35,10 @@ export class FinishScreenView extends View<FinishScreenModel> {
     };
 
     private readonly BUTTON_NINE_SLICE = {
-        left: 100,
-        top: 100,
-        right: 100,
-        bottom: 100,
+        left: 110,
+        top: 110,
+        right: 110,
+        bottom: 110,
     };
 
     constructor() {
@@ -107,7 +107,7 @@ export class FinishScreenView extends View<FinishScreenModel> {
     }
 
     private createTexts(): void {
-        this._titleText = this.createStyledText('Game Over', 64, { x: 0, y: -this.PANEL_HEIGHT / 2 + 80 });
+        this._titleText = this.createStyledText('Game Over', 64, { x: 0, y: -this.PANEL_HEIGHT / 2 + 120 });
         this._scoreText = this.createStyledText('Score: 0', 48, { x: 0, y: -20 });
     }
 
@@ -138,7 +138,7 @@ export class FinishScreenView extends View<FinishScreenModel> {
         });
         this._buttonsContainer.position.set(
             -(this.BUTTON_WIDTH * 2 + this.BUTTON_GAP) / 2,
-            this.PANEL_HEIGHT / 2 - this.BUTTON_HEIGHT - 80
+            this.PANEL_HEIGHT / 2 - this.BUTTON_HEIGHT - 120
         );
         this._container.addChild(this._buttonsContainer);
 
