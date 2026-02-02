@@ -4,7 +4,7 @@ import { Item } from '../Item/Item';
 
 export class BubbleTile extends Tile {
     private _item: Item | null = null;
-    private static readonly ITEM_MARGIN = 8;
+    private static readonly ITEM_MARGIN = 5;
 
     constructor(data: ITileData, texture?: PIXI.Texture) {
         super(data, texture);

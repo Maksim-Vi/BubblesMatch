@@ -43,7 +43,8 @@ export class BubbleView extends View<BubbleModel> {
         this._exitButton.cursor = 'pointer';
 
         const size = 50;
-        const padding = 20;
+        const paddingTop = 40;
+        const paddingRight = 50;
 
         // Button background (circle)
         const bg = new Graphics();
@@ -62,8 +63,8 @@ export class BubbleView extends View<BubbleModel> {
         this._exitButton.addChild(xText);
 
         this._exitButton.position.set(
-            ScreenHelper.TopRight.x - padding - size / 2,
-            ScreenHelper.TopRight.y + padding + size / 2
+            ScreenHelper.TopRight.x - paddingRight - size / 2,
+            ScreenHelper.TopRight.y + paddingTop + size / 2
         );
 
         this._exitButton.on('pointerover', () => {

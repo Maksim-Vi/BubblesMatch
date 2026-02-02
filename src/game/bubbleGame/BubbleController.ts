@@ -111,7 +111,7 @@ export class BubbleController extends Controller<BubbleModel, BubbleView> {
             row: row,
             col: col,
             sizeTile: gridConfig.cellSize,
-            margin: 8,
+            margin: 2,
         };
         const tile = new BubbleTile(tileData);
 

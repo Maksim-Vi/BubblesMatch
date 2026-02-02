@@ -1,6 +1,6 @@
 import { TileColor } from "src/common/cell/Tile";
 import { Model } from "src/core/mvc/Model";
-
+import levels from './levels.json'
 
 export interface IObstacleColor { 
     color: TileColor; 
@@ -42,128 +42,149 @@ export class LevelStore extends Model {
     }
 
     private initializeLevels(): void {
-        const baseGridConfig: IGridConfig = {
-            gridWidth: 8,
-            gridHeight: 8,
-            cellSize: 100, 
-            gap: 2
-        };
+        this._levels = levels.map(level => {
+            const colors = level.colors.map(colorStr => TileColor[colorStr as keyof typeof TileColor]);
+            const collectColors = level.obstacles.collectColors ? 
+                level.obstacles.collectColors.map((obj: any) => ({
+                    color: TileColor[obj.color as keyof typeof TileColor],
+                    count: obj.count
+                })) : null;
 
-        this._levels = [
-            {
-                id: 1,
-                gridConfig: { ...baseGridConfig, gridWidth: 8, gridHeight: 8 },
-                maxItems: 64,
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE],
+            return {
+                ...level,
+                colors: colors,
                 obstacles: {
-                    //collectScores: 1000,
-                    //maxMoves: 25,
-                    collectScores: 100,
-                    maxMoves: 5,
-                    collectColors: null
+                    ...level.obstacles,
+                    collectColors: collectColors
                 }
-            },
-            {
-                id: 2,
-                gridConfig: { ...baseGridConfig, gridWidth: 8, gridHeight: 8 },
-                maxItems: 64,
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE],
-                obstacles: {
-                    collectScores: 1000,
-                    maxMoves: 22,
-                    collectColors: null
-                }
-            },
-            {
-                id: 3,
-                gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9 }, 
-                maxItems: 81,
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE],
-                obstacles: {
-                    collectScores: 1500,
-                    maxMoves: 20,
-                    collectColors: null
-                }
-            },
-            {
-                id: 4,
-                gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9 },
-                maxItems: 81,
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
-                obstacles: {
-                    collectScores: 1600,
-                    maxMoves: 18,
-                    collectColors: null
-                }
-            },
-            {
-                id: 5,
-                gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9 },
-                maxItems: 81,
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
-                obstacles: {
-                    collectScores: 1800,
-                    maxMoves: 15,
-                    collectColors: null
-                }
-            },
-            {
-                id: 6,
-                gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 80 },
-                maxItems: 100, 
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
-                obstacles: {
-                    collectScores: 1800,
-                    maxMoves: 16,
-                    collectColors: null
-                }
-            },
-            {
-                id: 7,
-                gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 70 },
-                maxItems: 100,
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE],
-                obstacles: {
-                    collectScores: 2000,
-                    maxMoves: 14,
-                    collectColors: null
-                }
-            },
-            {
-                id: 8,
-                gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 70 },
-                maxItems: 100,
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE],
-                obstacles: {
-                    collectScores: 2000,
-                    maxMoves: 12,
-                    collectColors: null
-                }
-            },
-            {
-                id: 9,
-                gridConfig: { ...baseGridConfig, gridWidth: 11, gridHeight: 11, cellSize: 70 }, 
-                maxItems: 121,
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE, TileColor.MULTI],
-                obstacles: {
-                    collectScores: 2500,
-                    maxMoves: 13,
-                    collectColors: null
-                }
-            },
-            {
-                id: 10,
-                gridConfig: { ...baseGridConfig, gridWidth: 11, gridHeight: 11, cellSize: 70 },
-                maxItems: 121,
-                colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE, TileColor.MULTI],
-                obstacles: {
-                    collectScores: 2000,
-                    maxMoves: 10,
-                    collectColors: null
-                }
-            }
-        ];
+            };
+        });
+
+        // Сортуємо рівні за ID на всякий випадок
+        this._levels.sort((a, b) => a.id - b.id);
     }
+
+    // private initializeLevels(): void {
+    //     const baseGridConfig: IGridConfig = {
+    //         gridWidth: 8,
+    //         gridHeight: 8,
+    //         cellSize: 100, 
+    //         gap: 2
+    //     };
+
+    //     this._levels = [
+    //         {
+    //             id: 1,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 8, gridHeight: 8 },
+    //             maxItems: 64,
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE],
+    //             obstacles: {
+    //                 collectScores: 1000,
+    //                 maxMoves: 25,
+    //                 collectColors: null
+    //             }
+    //         },
+    //         {
+    //             id: 2,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 8, gridHeight: 8 },
+    //             maxItems: 64,
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE],
+    //             obstacles: {
+    //                 collectScores: 1000,
+    //                 maxMoves: 22,
+    //                 collectColors: null
+    //             }
+    //         },
+    //         {
+    //             id: 3,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9, cellSize: 90  }, 
+    //             maxItems: 81,
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE],
+    //             obstacles: {
+    //                 collectScores: 1500,
+    //                 maxMoves: 20,
+    //                 collectColors: null
+    //             }
+    //         },
+    //         {
+    //             id: 4,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9, cellSize: 90  },
+    //             maxItems: 81,
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
+    //             obstacles: {
+    //                 collectScores: 1600,
+    //                 maxMoves: 18,
+    //                 collectColors: null
+    //             }
+    //         },
+    //         {
+    //             id: 5,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 9, gridHeight: 9, cellSize: 90  },
+    //             maxItems: 81,
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
+    //             obstacles: {
+    //                 collectScores: 1800,
+    //                 maxMoves: 15,
+    //                 collectColors: null
+    //             }
+    //         },
+    //         {
+    //             id: 6,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 80 },
+    //             maxItems: 100, 
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN],
+    //             obstacles: {
+    //                 collectScores: 1800,
+    //                 maxMoves: 16,
+    //                 collectColors: null
+    //             }
+    //         },
+    //         {
+    //             id: 7,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 80 },
+    //             maxItems: 100,
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE],
+    //             obstacles: {
+    //                 collectScores: 2000,
+    //                 maxMoves: 14,
+    //                 collectColors: null
+    //             }
+    //         },
+    //         {
+    //             id: 8,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 10, gridHeight: 10, cellSize: 80 },
+    //             maxItems: 100,
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE],
+    //             obstacles: {
+    //                 collectScores: 2000,
+    //                 maxMoves: 12,
+    //                 collectColors: null
+    //             }
+    //         },
+    //         {
+    //             id: 9,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 11, gridHeight: 11, cellSize: 70 }, 
+    //             maxItems: 121,
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE, TileColor.MULTI],
+    //             obstacles: {
+    //                 collectScores: 2500,
+    //                 maxMoves: 13,
+    //                 collectColors: null
+    //             }
+    //         },
+    //         {
+    //             id: 10,
+    //             gridConfig: { ...baseGridConfig, gridWidth: 11, gridHeight: 11, cellSize: 70 },
+    //             maxItems: 121,
+    //             colors: [TileColor.RED, TileColor.YELLOW, TileColor.PURPURE, TileColor.BLUE, TileColor.GREEN, TileColor.ORANGE, TileColor.MULTI],
+    //             obstacles: {
+    //                 collectScores: 2000,
+    //                 maxMoves: 10,
+    //                 collectColors: null
+    //             }
+    //         }
+    //     ];
+    // }
 
     getLevel(levelId: number): ILevelConfig | null {
         // Тепер шукаємо за 'id', а не за індексом

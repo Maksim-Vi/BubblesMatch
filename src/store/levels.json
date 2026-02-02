@@ -1,0 +1,323 @@
+[
+  {
+    "id": 1,
+    "gridConfig": {
+      "gridWidth": 8,
+      "gridHeight": 8,
+      "cellSize": 100,
+      "gap": 2
+    },
+    "maxItems": 64,
+    "colors": ["RED", "YELLOW", "PURPURE"],
+    "obstacles": {
+      "collectScores": 1000,
+      "maxMoves": 20,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 2,
+    "gridConfig": {
+      "gridWidth": 8,
+      "gridHeight": 8,
+      "cellSize": 100,
+      "gap": 2
+    },
+    "maxItems": 64,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE"],
+    "obstacles": {
+      "collectScores": 1200,
+      "maxMoves": 15,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 3,
+    "gridConfig": {
+      "gridWidth": 9,
+      "gridHeight": 9,
+      "cellSize": 90,
+      "gap": 2
+    },
+    "maxItems": 81,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE"],
+    "obstacles": {
+      "collectScores": 1500,
+      "maxMoves": 15,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 4,
+    "gridConfig": {
+      "gridWidth": 9,
+      "gridHeight": 9,
+      "cellSize": 90,
+      "gap": 2
+    },
+    "maxItems": 81,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN"],
+    "obstacles": {
+      "collectScores": 1800,
+      "maxMoves": 15,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 5,
+    "gridConfig": {
+      "gridWidth": 9,
+      "gridHeight": 9,
+      "cellSize": 90,
+      "gap": 2
+    },
+    "maxItems": 81,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN"],
+    "obstacles": {
+      "collectScores": 1800,
+      "maxMoves": 12,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 6,
+    "gridConfig": {
+      "gridWidth": 10,
+      "gridHeight": 10,
+      "cellSize": 80,
+      "gap": 2
+    },
+    "maxItems": 100,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN"],
+    "obstacles": {
+      "collectScores": 1800,
+      "maxMoves": 10,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 7,
+    "gridConfig": {
+      "gridWidth": 10,
+      "gridHeight": 10,
+      "cellSize": 80,
+      "gap": 2
+    },
+    "maxItems": 100,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE"],
+    "obstacles": {
+      "collectScores": 2000,
+      "maxMoves": 12,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 8,
+    "gridConfig": {
+      "gridWidth": 10,
+      "gridHeight": 10,
+      "cellSize": 80,
+      "gap": 2
+    },
+    "maxItems": 100,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE"],
+    "obstacles": {
+      "collectScores": 2200,
+      "maxMoves": 10,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 9,
+    "gridConfig": {
+      "gridWidth": 11,
+      "gridHeight": 11,
+      "cellSize": 70,
+      "gap": 2
+    },
+    "maxItems": 121,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE"],
+    "obstacles": {
+      "collectScores": 2500,
+      "maxMoves": 12,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 10,
+    "gridConfig": {
+      "gridWidth": 11,
+      "gridHeight": 11,
+      "cellSize": 70,
+      "gap": 2
+    },
+    "maxItems": 121,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 2500,
+      "maxMoves": 10,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 11,
+    "gridConfig": {
+      "gridWidth": 10,
+      "gridHeight": 10,
+      "cellSize": 80,
+      "gap": 2
+    },
+    "maxItems": 100,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 2500,
+      "maxMoves": 8,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 12,
+    "gridConfig": {
+      "gridWidth": 11,
+      "gridHeight": 11,
+      "cellSize": 70,
+      "gap": 2
+    },
+    "maxItems": 121,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 2800,
+      "maxMoves": 12,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 13,
+    "gridConfig": {
+      "gridWidth": 9,
+      "gridHeight": 9,
+      "cellSize": 90,
+      "gap": 2
+    },
+    "maxItems": 81,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 2900,
+      "maxMoves": 12,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 14,
+    "gridConfig": {
+      "gridWidth": 10,
+      "gridHeight": 10,
+      "cellSize": 80,
+      "gap": 2
+    },
+    "maxItems": 100,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 3000,
+      "maxMoves": 12,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 15,
+    "gridConfig": {
+      "gridWidth": 11,
+      "gridHeight": 11,
+      "cellSize": 70,
+      "gap": 2
+    },
+    "maxItems": 121,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 3000,
+      "maxMoves": 10,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 16,
+    "gridConfig": {
+      "gridWidth": 10,
+      "gridHeight": 10,
+      "cellSize": 80,
+      "gap": 2
+    },
+    "maxItems": 100,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 3000,
+      "maxMoves": 9,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 17,
+    "gridConfig": {
+      "gridWidth": 11,
+      "gridHeight": 11,
+      "cellSize": 70,
+      "gap": 2
+    },
+    "maxItems": 121,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 2400,
+      "maxMoves": 8,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 18,
+    "gridConfig": {
+      "gridWidth": 9,
+      "gridHeight": 9,
+      "cellSize": 90,
+      "gap": 2
+    },
+    "maxItems": 81,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 2000,
+      "maxMoves": 8,
+      "collectColors": null
+
+    }
+  },
+  {
+    "id": 19,
+    "gridConfig": {
+      "gridWidth": 11,
+      "gridHeight": 11,
+      "cellSize": 70,
+      "gap": 2
+    },
+    "maxItems": 121,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 2000,
+      "maxMoves": 6,
+      "collectColors": null
+    }
+  },
+  {
+    "id": 20,
+    "gridConfig": {
+      "gridWidth": 11,
+      "gridHeight": 11,
+      "cellSize": 70,
+      "gap": 2
+    },
+    "maxItems": 121,
+    "colors": ["RED", "YELLOW", "PURPURE", "BLUE", "GREEN", "ORANGE", "MULTI"],
+    "obstacles": {
+      "collectScores": 2000,
+      "maxMoves": 5,
+      "collectColors": null
+    }
+  }
+]
